@@ -1,0 +1,30 @@
+code,name,description,type,parent_code
+DG,DG Office,Office of the Director-General. Responsible for overall management and strategic direction of the organization.,DG_O,
+REP,Rural Employment Promotion,Department focused on promoting employment opportunities in rural areas.,PROG,
+SPW,Special Public Works,Department responsible for implementing special public works programs to create temporary employment.,PROG,
+SSE,Small Scale Enterprises,Department dedicated to supporting the development and growth of small-scale enterprises.,PROG,
+VSD,Vocational Skills Department,Department focused on providing vocational skills training and development programs.,PROG,
+F&A,Finance and Accounts,"Department responsible for managing the organization's finances, accounting, budgeting, and financial reporting.",SERV,
+HR,Human Resources,"Department managing all aspects of human resources, including recruitment, onboarding, training, compensation, benefits, and employee relations.",SERV,
+IA,Internal Audit,"Department responsible for internal auditing, ensuring compliance with regulations and internal controls.",SERV,
+INSP,Inspectorate,"Department responsible for inspections, monitoring, and evaluation of programs and activities.",SERV,
+PR&S,"Planning, Research & Statistics","Department responsible for strategic planning, data collection, analysis, research, and statistical reporting.",SERV,
+PROC,Procurement,"Department responsible for procuring goods and services, managing contracts, and ensuring compliance with procurement regulations.",SERV,
+NE-Z,North East Zonal Office,Zonal office responsible for overseeing operations in the North East region.,ZONAL,
+NC-Z,North Central Zonal Office,Zonal office responsible for overseeing operations in the North Central region.,ZONAL,
+NW-Z,North West Zonal Office,Zonal office responsible for overseeing operations in the North West region.,ZONAL,
+SE-Z,South East Zonal Office,Zonal office responsible for overseeing operations in the South East region.,ZONAL,
+SS-Z,South South Zonal Office,Zonal office responsible for overseeing operations in the South South region.,ZONAL,
+SW-Z,South West Zonal Office,Zonal office responsible for overseeing operations in the South West region.,ZONAL,
+LOANS,Loans Unit,Unit responsible for managing and administering loan programs.,UTILITY,DG
+STORE,Stores Unit,Unit responsible for managing and maintaining the organization's stores and inventory.,UTILITY,DG
+TRANS,Transport Unit,Unit responsible for managing the organization's transportation and fleet.,UTILITY,DG
+UTILITIES,Utilities Unit,Unit that manages the organization utilities.,UTILITY,DG
+BOARD,Board Secretariat,Provides administrative and secretarial support to the organization's board of directors. (Consider renaming for clarity),BRANCH,DG
+IPR,Information and Public Relations,"Department responsible for managing communications, public relations, and media relations.",BRANCH,PR&S
+JC,Job Centre,"Branch providing job placement services, career counseling, and employment information.",BRANCH,PR&S
+LEGAL,Legal Unit,"Provides legal advice and services to the organization, handling legal matters and ensuring compliance.",BRANCH,DG
+RC,Resource Centre and Library,"Branch managing the organization's resource center and library, providing access to information and resources.",BRANCH,PR&S
+WEB,Women Empowerment Branch,"Branch focused on programs and initiatives to empower women in the workforce and community. (Consider ""Gender Equity"" as an alternative)",BRANCH,REP
+OSD,OSD (Please Define),Need more Information.,BRANCH,
+P&U,P&U (Please Define),Need more Information,BRANCH,

@@ -1,0 +1,40 @@
+name,code,zone_code
+Abia,ABI,SE
+Adamawa,ADA,NE
+Akwa Ibom,AKW,SS
+Anambra,ANA,SE
+Bauchi,BAU,NE
+Bayelsa,BAY,SS
+Benue,BEN,NC
+Borno,BOR,NE
+Cross River,CRO,SS
+Delta,DEL,SS
+Ebonyi,EBO,SE
+Edo,EDO,SS
+Ekiti,EKI,SW
+Enugu,ENU,SE
+FCT,FCT,NC
+Gombe,GOM,NE
+Headquarters,HQ,HQ
+Imo,IMO,SE
+Jigawa,JIG,NW
+Kaduna,KAD,NW
+Kano,KAN,NW
+Katsina,KAT,NW
+Kebbi,KEB,NW
+Kogi,KOG,NC
+Kwara,KWA,NC
+Lagos,LAG,SW
+Nasarawa,NAS,NC
+Niger,NIG,NC
+Ogun,OGU,SW
+Ondo,OND,SW
+Osun,OSU,SW
+Oyo,OYO,SW
+Plateau,PLA,NC
+Rivers,RIV,SS
+Sokoto,SOK,NW
+Taraba,TAR,NE
+Yobe,YOB,NE
+Zamfara,ZAM,NW
+Zonal Office,ZON,ZO

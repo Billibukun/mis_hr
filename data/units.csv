@@ -1,0 +1,9 @@
+code,name,description,department_code
+NOM_ROLL,Nominal Roll,Maintains and manages the organization's nominal roll (official list of employees).,HR
+RECRUIT,Recruitment,"Handles the recruitment process, including job postings, application screening, interviews, and selection.",HR
+RETIRE,Retirement,"Manages employee retirement processes, including pre-retirement counseling, benefits processing, and record keeping.",HR
+EXAM,Examinations,"Administers employee examinations for promotions, certifications, and other assessments.",HR
+PROM,Promotions,"Manages the employee promotion process, including eligibility verification, recommendations, and approvals.",HR
+LEAVE,Leave Management,"Processes leave requests, tracks leave balances, and ensures compliance with leave policies.",HR
+TRANS,Transfers Unit,"Handles employee transfers between departments, locations, or positions.",HR
+REGISTRY,Open Registry,Manages the open registry of employee records and documents.,HR

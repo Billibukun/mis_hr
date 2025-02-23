@@ -1,0 +1,38 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HRMIS{% endblock %}</title>
+    <link href="{% static 'src/output.css' %}" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <nav class="bg-blue-800 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="font-bold text-xl">HRMIS</a>
+            <div class="space-x-4">
+                {% if user.is_authenticated %}
+                    <span class="hover:underline">Welcome, {{ user.username }}</span>
+                    <a href="{% url 'logout' %}" class="hover:underline">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="hover:underline">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8 p-4">
+        {% block content %}
+            {# Content will be inserted here #}
+        {% endblock %}
+    </div>
+
+    <footer class="bg-gray-200 text-gray-700 text-center p-4 mt-8">
+        <p>© {% now "Y" %} Your Organization. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
