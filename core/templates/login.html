@@ -5,156 +5,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Login - NDE Internal Management System</title>
-    <link href="{% static 'src/output.css' %}" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">  <!-- Favicon -->
+    <link href="static/src/output.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 </head>
-<body class="font-sans">
+<body class="bg-yellow-500 font-sans antialiased">  <div class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md p-8 bg-yellow rounded-lg shadow-xl">
 
-<div class="main-container flex flex-col md:flex-row h-screen">  <!-- Added flex-col and md:flex-row -->
-
-    <div class="left-section bg-yellow-300 flex-1 flex flex-col justify-center items-center p-10 md:p-20"> <!-- Added p-10 and md:p-20 -->
-        <img src="{% static 'images/logo.png' %}" alt="NDE Logo" class="logo max-w-[150px] h-auto mb-6">
-        <div class="system-name">
-            <h1 class="text-2xl md:text-4xl font-extrabold text-black text-center">NDE Internal Management System</h1>  <!-- Added md:text-4xl -->
-            <p class="text-base md:text-lg text-gray-700 text-center mt-2">Staff Access Only</p> <!-- Added md:text-lg -->
+        <div class="text-center mb-8">
+            <img src="{% static 'images/logo.png' %}" alt="NDE Logo" class="h-20 w-auto  mb-4">  <h1 class="text-2xl font-semibold text-gray-800">NDE Internal System</h1>
+            <p class="text-gray-500">Staff Login</p>
         </div>
-    </div>
 
-    <div class="right-section bg-yellow-300 flex-1 flex justify-center items-center p-4 md:p-8"> <!-- Added p-4 and md:p-8 -->
-        <div class="login-box w-full max-w-md">
-            <div class="relative flex w-full flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md">
-                <div class="relative mx-4 -mt-6 mb-4 grid h-28 place-items-center overflow-hidden rounded-xl bg-gradient-to-tr from-yellow-600 to-yellow-400 bg-clip-border text-white shadow-lg shadow-yellow-500/40">
-                    <h3 class="block font-sans text-3xl font-semibold leading-snug tracking-normal text-white antialiased">
-                        Staff Login
-                    </h3>
+        <form method="post" action="{% url 'login' %}" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline"> Please enter the correct username or password.</span>
                 </div>
-                <div class="flex flex-col gap-4 p-6">
-                    <div class="relative h-11 w-full min-w-[200px]">
-                        <input
-                            placeholder="Username"
-                            class="peer h-full w-full rounded-md border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-3 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-yellow-500 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50"
-                            id="id_username"
-                            type="text"
-                            name="username"
-                        />
-                        <label
-                            class="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-xs font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[4.1] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-xs peer-focus:leading-tight peer-focus:text-yellow-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:!border-yellow-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:!border-yellow-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500"
-                            for="id_username"
-                        >
-                            Username
-                        </label>
-                    </div>
-                    <div class="relative h-11 w-full min-w-[200px]">
-                        <input
-                            placeholder="Password"
-                            class="peer h-full w-full rounded-md border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-3 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-yellow-500 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50"
-                            id="id_password"
-                            type="password"
-                            name="password"
-                        />
-                        <label
-                            class="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-xs font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[4.1] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-xs peer-focus:leading-tight peer-focus:text-yellow-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:!border-yellow-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:!border-yellow-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500"
-                            for="id_password"
-                        >
-                            Password
-                        </label>
-                    </div>
-                    <div class="-ml-2.5">
-                        <div class="inline-flex items-center">
-                            <label
-                                data-ripple-dark="true"
-                                for="checkbox"
-                                class="relative flex cursor-pointer items-center rounded-full p-3"
-                            >
-                                <input
-                                    id="checkbox"
-                                    class="before:content[''] peer relative h-5 w-5 cursor-pointer appearance-none rounded-md border border-blue-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-blue-gray-500 before:opacity-0 before:transition-opacity checked:border-yellow-500 checked:bg-yellow-500 checked:before:bg-yellow-500 hover:before:opacity-10"
-                                    type="checkbox"
-                                />
-                                <span
-                                    class="pointer-events-none absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 text-white opacity-0 transition-opacity peer-checked:opacity-100"
-                                >
-                                    <svg
-                                        stroke-width="1"
-                                        stroke="currentColor"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                        class="h-3.5 w-3.5"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            clip-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            fill-rule="evenodd"
-                                        ></path>
-                                    </svg>
-                                </span>
-                            </label>
-                            <label
-                                for="checkbox"
-                                class="mt-px cursor-pointer select-none font-light text-gray-700"
-                            >
-                                Remember Me
-                            </label>
-                        </div>
-                    </div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="sr-only">Username</label>
+                {{ form.username }}
+            </div>
+
+            <div>
+                <label for="{{ form.password.id_for_label }}" class="sr-only">Password</label>
+                {{ form.password }}
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input id="remember_me" type="checkbox" class="h-4 w-4 text-yellow-500 focus:ring-yellow-500 border-gray-300 rounded">
+                    <label for="remember_me" class="ml-2 block text-sm text-gray-900">Remember me</label>
                 </div>
-                <div class="p-6 pt-0 flex justify-center">
-                    <button
-                        data-ripple-light="true"
-                        type="Submit"
-                        id="SubmitButton"
-                        class=" block rounded-full border-2 border-white bg-transparent px-8 py-2 font-bold text-lg text-black shadow-lg transition-all hover:scale-105 hover:border-yellow-600 hover:shadow-yellow-500/50 focus:outline-none w-full max-w-sm"
-                    >
-                        Sign In
-                    </button>
-                </div>
-                <div class="p-6 pt-0">
-                    <p
-                        class="mt-6 flex justify-center font-sans text-sm font-light leading-normal text-inherit antialiased"
-                    >
-                        Forgot your password?
-                        <a
-                            class="ml-1 block font-sans text-sm font-bold leading-normal text-red-500 antialiased"
-                            href="#" onclick="alert('Please contact your administrator to reset your password.'); return false;"
-                        >
-                            Reset Password
-                        </a>
-                    </p>
+
+                <div class="text-sm">
+                    <a href="#" onclick="alert('Please contact your administrator to reset your password.'); return false;" class="font-medium text-yellow-600 hover:text-yellow-500">Forgot password?</a>
                 </div>
             </div>
 
-
-            {% if messages %}
-                <ul class="messages mt-4">
-                    {% for message in messages %}
-                        <li{% if message.tags %} class="{{ message.tags }} rounded-md p-2 mb-2 list-none text-left"{% endif %}>
-                            {{ message }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-
-            <form method="post" class="hidden">  {% csrf_token %}
-                <div class="form-group">
-                    <label for="id_username">Username:</label>
-                    {{ form.username }}
-                </div>
-                <div class="form-group">
-                    <label for="id_password">Password:</label>
-                    {{ form.password }}
-                </div>
-
-            </form>
-
-
-            <p class="site-info mt-6 text-center text-sm text-gray-700">
-                This site is for the staff of NDE. If you are lost, kindly click
-                <a href="https://nde.gov.ng" target="_blank" class="text-blue-500">here</a> to go back to the official website.
-            </p>
-        </div>
+            <div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-yellow-700 hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-700">
+                    Sign in
+                </button>
+            </div>
+        </form>
+        {% if messages %}
+            <ul class="mt-4">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="rounded-md p-2 mb-2 list-none text-left {{ message.tags }}"{% endif %}>
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <p class="mt-6 text-center text-sm text-gray-700">
+            This site is for the staff of NDE. If you are lost, kindly click
+            <a href="https://nde.gov.ng" target="_blank" class="text-blue-500 hover:underline">here</a> to go back to the official website.
+        </p>
     </div>
-
 </div>
 
 </body>

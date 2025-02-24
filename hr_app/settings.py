@@ -163,8 +163,7 @@ EMAIL_HOST_PASSWORD = '@info.nde'
 DEFAULT_FROM_EMAIL = 'no-reply@nde-internal.org.ng' 
 
 # Add the below line
-LOGIN_REDIRECT_URL = "home"  # Redirect to 'home' after login (we'll create this later)
-LOGOUT_REDIRECT_URL = 'login' # Redirect to login after লগ আউট
+LOGIN_REDIRECT_URL = "home"
 
 # Add for shell plus
 SHELL_PLUS_PRINT_SQL = True

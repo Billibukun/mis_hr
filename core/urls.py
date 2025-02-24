@@ -1,12 +1,16 @@
 # core/urls.py
-from django.urls import path
-from .views import *
+from django.urls import path, include
+from . import views
 
 urlpatterns = [
-    path('', CustomLoginView.as_view(), name='login'), # Login URL
-    path('logout/', CustomLogoutView.as_view(), name='logout'), # Logout URL
-    path('profile/update/', update_employee_profile, name='update_employee_profile'), # Profile Update URL
-    path('profile/update/success/', profile_updated_success, name='profile_updated_success'), # Profile Update Success URL
-    path('users/upload/csv/', upload_users_csv, name='upload_users_csv'), # User CSV Upload URL (under /admin/)
-    path('admin/users/upload/csv/success/', upload_users_success, name='upload_users_success'), # User CSV Upload Success URL (under /admin/)
+    path('', views.CustomLoginView.as_view(), name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('home/', views.HomeView.as_view(), name='home'),
+    path('profile/update/', views.EmployeeProfileUpdateView.as_view(), name='update_employee_profile'),
+    # Newsletter URLs
+    path('newsletter/', views.NewsletterListView.as_view(), name='newsletter_list'),
+    path('newsletter/create/', views.NewsletterCreateView.as_view(), name='newsletter_create'),
+    path('newsletter/<int:pk>/update/', views.NewsletterUpdateView.as_view(), name='newsletter_update'),
+    path('newsletter/<int:pk>/delete/', views.NewsletterDeleteView.as_view(), name='newsletter_delete'),
+    path('newsletter/<int:pk>/', views.NewsletterDetailView.as_view(), name='newsletter_detail'),
 ]

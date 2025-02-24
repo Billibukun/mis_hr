@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold">Welcome, {% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% else %}Guest{% endif %}!</h1>
+
+    {% if user.is_authenticated %}
+        <p>You are logged in.</p>
+        <a href="{% url 'update_employee_profile' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Update Profile</a>
+        <a href="{% url 'logout' %}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</a>
+
+        <h2 class="text-2xl font-bold mt-8 mb-4">Latest News</h2>
+        {% if newsletters %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for newsletter in newsletters %}
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <h3 class="text-xl font-semibold mb-2"><a href="#">{{ newsletter.title }}</a></h3>
+                        <p class="text-gray-600 text-sm mb-2">Published on: {{ newsletter.publish_date|date:"F j, Y" }}</p>
+                        <p>{{ newsletter.content|truncatewords:20 }}</p> {# Show a preview #}
+
+                    </div>
+                {% endfor %}
+            </div>
+         {% else %}
+            <p>No newsletters available.</p>
+        {% endif %}
+     {% else %}
+        <p>Please <a href="{% url 'login' %}" class="text-blue-500 hover:underline">log in</a> to view your profile and other features.</p>
+    {% endif %}
+</div>
+{% endblock %}

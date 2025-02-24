@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
@@ -10,7 +10,7 @@ from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ForeignKeyWidget, DateWidget, CharWidget, BooleanWidget
 from import_export.results import RowResult  # Import RowResult
-from .models import Department, Unit, Zone, State, LGA, Bank, PFA, Designation, EmployeeProfile, EmployeeDetail
+from .models import Department, Newsletter, Unit, Zone, State, LGA, Bank, PFA, Designation, EmployeeProfile, EmployeeDetail
 
 
 import logging
@@ -366,3 +366,4 @@ class DesignationAdmin(ImportExportModelAdmin):
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+admin.site.register(Newsletter)

@@ -1,38 +1,61 @@
 {% load static %}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}HRMIS{% endblock %}</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}NDE Internal Management System{% endblock %}</title>
+
+    <!-- Tailwind CSS (assuming you have it configured) -->
     <link href="{% static 'src/output.css' %}" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+    <!-- Favicon (optional, but good practice) -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+
+    <!-- Any extra CSS you want on ALL pages -->
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gray-100 font-sans antialiased">
 
-    <nav class="bg-blue-800 p-4 text-white">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="font-bold text-xl">HRMIS</a>
-            <div class="space-x-4">
-                {% if user.is_authenticated %}
-                    <span class="hover:underline">Welcome, {{ user.username }}</span>
-                    <a href="{% url 'logout' %}" class="hover:underline">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="hover:underline">Login</a>
-                {% endif %}
-            </div>
+<body class="bg-gray-50 font-sans antialiased">  <!-- Light gray background, good default font -->
+
+    <header class="bg-yellow-500 text-white py-4 shadow-md">  <!-- Header with your primary color -->
+        <div class="container mx-auto flex items-center justify-between px-4">
+            <a href="{% url 'home' %}" class="flex items-center">
+                <img src="{% static 'images/logo.png' %}" alt="NDE Logo" class="h-20 w-auto mr-2">  <!-- Adjust height as needed -->
+                <span class="text-lg font-bold">NDE Internal System</span>
+            </a>
+
+            <nav>
+                <ul class="flex space-x-6">  <!-- Horizontal navigation -->
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'home' %}" class="hover:text-gray-200">Dashboard</a></li>
+                        <li><a href="{% url 'update_employee_profile' %}" class="hover:text-gray-200">My Profile</a></li>
+                        {% if user.is_staff %}  <!-- Example: Show admin link only to staff users -->
+                            <li><a href="/admin/" class="hover:text-gray-200">Admin</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'logout' %}" class="hover:text-gray-200">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}" class="hover:text-gray-200">Login</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
-    </nav>
+    </header>
 
-    <div class="container mx-auto mt-8 p-4">
+    <main class="container mx-auto px-4 py-8">  <!-- Main content area -->
         {% block content %}
-            {# Content will be inserted here #}
         {% endblock %}
-    </div>
+    </main>
 
-    <footer class="bg-gray-200 text-gray-700 text-center p-4 mt-8">
-        <p>© {% now "Y" %} Your Organization. All rights reserved.</p>
+    <footer class="bg-gray-800 text-white py-6 mt-12">  <!-- Footer -->
+        <div class="container mx-auto text-center px-4">
+            <p>© {% now "Y" %} National Directorate of Employment. All rights reserved.</p>
+            <p>For internal use only.</p>
+        </div>
     </footer>
 
+     <!-- JavaScript (at the end of the body for performance) -->
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
