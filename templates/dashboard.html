@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - HR Management System{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ request.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <!-- Quick Stats -->
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+            <div class="bg-indigo-100 p-3 rounded-full">
+                <i class="fas fa-users text-indigo-500"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-gray-500 text-sm">Employees</h3>
+                <p class="text-2xl font-semibold">{{ employee_count }}</p>
+            </div>
+        </div>
+        <div class="mt-2 text-xs text-gray-500">
+            <span class="text-green-500">
+                <i class="fas fa-arrow-up"></i> {{ new_employees }}
+            </span>
+            <span>new employees this month</span>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+            <div class="bg-blue-100 p-3 rounded-full">
+                <i class="fas fa-calendar-alt text-blue-500"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-gray-500 text-sm">Leave Requests</h3>
+                <p class="text-2xl font-semibold">{{ pending_leaves }}</p>
+            </div>
+        </div>
+        <div class="mt-2 text-xs text-gray-500">
+            <span class="text-blue-500">
+                <i class="fas fa-clock"></i> {{ approved_leaves }}
+            </span>
+            <span>approved this month</span>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+            <div class="bg-green-100 p-3 rounded-full">
+                <i class="fas fa-tasks text-green-500"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-gray-500 text-sm">Tasks</h3>
+                <p class="text-2xl font-semibold">{{ my_tasks_count }}</p>
+            </div>
+        </div>
+        <div class="mt-2 text-xs text-gray-500">
+            <span class="text-yellow-500">
+                <i class="fas fa-exclamation-circle"></i> {{ overdue_tasks }}
+            </span>
+            <span>tasks overdue</span>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+            <div class="bg-purple-100 p-3 rounded-full">
+                <i class="fas fa-graduation-cap text-purple-500"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-gray-500 text-sm">Trainings</h3>
+                <p class="text-2xl font-semibold">{{ upcoming_trainings }}</p>
+            </div>
+        </div>
+        <div class="mt-2 text-xs text-gray-500">
+            <span class="text-purple-500">
+                <i class="fas fa-calendar-check"></i> {{ ongoing_trainings }}
+            </span>
+            <span>ongoing now</span>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="bg-white rounded-lg shadow mb-8">
+    <div class="border-b border-gray-200 px-4 py-3">
+        <h3 class="font-medium">Quick Actions</h3>
+    </div>
+    <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        {% if 'can_manage_leaves' in request.user_permissions %}
+        <a href="{% url 'hr_modules:leave_create' %}" class="p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+            <i class="fas fa-calendar-plus text-blue-500 text-xl mb-2"></i>
+            <p class="text-sm">Request Leave</p>
+        </a>
+        {% endif %}
+        
+        {% if 'can_create_tasks' in request.user_permissions %}
+        <a href="{% url 'task_management:task_create' %}" class="p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+            <i class="fas fa-plus-circle text-green-500 text-xl mb-2"></i>
+            <p class="text-sm">Create Task</p>
+        </a>
+        {% endif %}
+        
+        {% if 'can_manage_files' in request.user_permissions %}
+        <a href="{% url 'file_management:file_upload' %}" class="p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+            <i class="fas fa-file-upload text-purple-500 text-xl mb-2"></i>
+            <p class="text-sm">Upload File</p>
+        </a>
+        {% endif %}
+        
+        <a href="{% url 'profile' %}" class="p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+            <i class="fas fa-user-edit text-gray-500 text-xl mb-2"></i>
+            <p class="text-sm">Update Profile</p>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- My Tasks -->
+    <div class="bg-white rounded-lg shadow lg:col-span-2">
+        <div class="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+            <h3 class="font-medium">My Tasks</h3>
+            <a href="{% url 'task_management:task_list' %}" class="text-sm text-blue-600 hover:text-blue-800">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for task in my_tasks %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{% url 'task_management:task_detail' task.id %}" class="text-blue-600 hover:text-blue-900">{{ task.title }}</a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if task.priority.level > 3 %}bg-red-100 text-red-800
+                                {% elif task.priority.level > 1 %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ task.priority.name }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: {{ task.status.color_code }}20; color: {{ task.status.color_code }};">
+                                {{ task.status.name }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap {% if task.is_overdue %}text-red-600{% endif %}">
+                            {{ task.due_date|date:"M d, Y" }}
+                            {% if task.is_overdue %}<i class="fas fa-exclamation-circle ml-1"></i>{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">No tasks assigned to you</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Upcoming Events -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="border-b border-gray-200 px-4 py-3">
+            <h3 class="font-medium">Upcoming Events</h3>
+        </div>
+        <div class="p-4">
+            <ul class="divide-y divide-gray-200">
+                {% for event in upcoming_events %}
+                <li class="py-3">
+                    <div class="flex items-start">
+                        <div class="bg-blue-100 text-blue-800 text-xs rounded-full px-2 py-1 flex flex-col items-center min-w-[40px]">
+                            <span class="font-bold">{{ event.date|date:"d" }}</span>
+                            <span>{{ event.date|date:"M" }}</span>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium">{{ event.title }}</p>
+                            <p class="text-xs text-gray-500">{{ event.description }}</p>
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="py-3 text-center text-gray-500">No upcoming events</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Summary and Training Opportunities -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <!-- Leave Summary -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="border-b border-gray-200 px-4 py-3">
+            <h3 class="font-medium">Leave Summary</h3>
+        </div>
+        <div class="p-4">
+            {% if leave_balances %}
+            <div class="space-y-4">
+                {% for balance in leave_balances %}
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm font-medium">{{ balance.leave_type.name }}</span>
+                        <span class="text-sm text-gray-500">{{ balance.remaining_balance }} / {{ balance.initial_balance }} days</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        {% comment %} <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ balance.remaining_balance|div:balance.initial_balance|mul:100 }}%"></div> {% endcomment %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-gray-500">No leave information available</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Training Opportunities -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+            <h3 class="font-medium">Training Opportunities</h3>
+            <a href="{% url 'hr_modules:training_list' %}" class="text-sm text-blue-600 hover:text-blue-800">View All</a>
+        </div>
+        <div class="p-4">
+            <ul class="divide-y divide-gray-200">
+                {% for training in available_trainings %}
+                <li class="py-3">
+                    <a href="{% url 'hr_modules:training_detail' training.id %}" class="block hover:bg-gray-50 -m-2 p-2 rounded">
+                        <div class="flex justify-between">
+                            <p class="text-sm font-medium">{{ training.title }}</p>
+                            <p class="text-xs text-blue-600 font-medium">{{ training.start_date|date:"M d" }} - {{ training.end_date|date:"M d" }}</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1 truncate">{{ training.description|truncatechars:100 }}</p>
+                        <div class="mt-2 flex items-center text-xs">
+                            <span class="px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">{{ training.training_type.name }}</span>
+                            <span class="ml-2 text-gray-500">{{ training.location }}</span>
+                            <span class="ml-auto text-xs text-gray-500">{{ training.participants.count }}/{{ training.capacity }} enrolled</span>
+                        </div>
+                    </a>
+                </li>
+                {% empty %}
+                <li class="py-3 text-center text-gray-500">No available training opportunities</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Recently Uploaded Files -->
+<div class="bg-white rounded-lg shadow mt-6">
+    <div class="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+        <h3 class="font-medium">Recently Uploaded Files</h3>
+        <a href="{% url 'file_management:file_list' %}" class="text-sm text-blue-600 hover:text-blue-800">View All</a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded By</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for file in recent_files %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{% url 'file_management:file_detail' file.id %}" class="text-blue-600 hover:text-blue-900 flex items-center">
+                            <i class="fas fa-file mr-2 
+                                {% if file.file_type == 'pdf' %}text-red-500
+                                {% elif file.file_type == 'doc' or file.file_type == 'docx' %}text-blue-500
+                                {% elif file.file_type == 'xls' or file.file_type == 'xlsx' %}text-green-500
+                                {% elif file.file_type == 'ppt' or file.file_type == 'pptx' %}text-orange-500
+                                {% else %}text-gray-500{% endif %}
+                            "></i>
+                            {{ file.title }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap uppercase text-xs">{{ file.file_type }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ file.created_by.get_full_name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ file.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">No recent files</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

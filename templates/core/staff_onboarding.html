@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Onboarding - HR Management System{% endblock %}
+
+{% block page_title %}Staff Onboarding{% endblock %}
+{% block page_subtitle %}Create a new employee account{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- User Information -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 border-b pb-2">User Information</h3>
+            </div>
+            
+            <!-- Username -->
+            <div>
+                <label for="id_username" class="block text-sm font-medium text-gray-700">Username</label>
+                <div class="mt-1">
+                    <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                </div>
+                {% if form.username.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Email -->
+            <div>
+                <label for="id_email" class="block text-sm font-medium text-gray-700">Email</label>
+                <div class="mt-1">
+                    <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                </div>
+                {% if form.email.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- First Name -->
+            <div>
+                <label for="id_first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+                <div class="mt-1">
+                    <input type="text" name="first_name" id="id_first_name" value="{{ form.first_name.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                </div>
+                {% if form.first_name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Last Name -->
+            <div>
+                <label for="id_last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                <div class="mt-1">
+                    <input type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                </div>
+                {% if form.last_name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Basic Employee Information -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mt-6">Basic Employee Information</h3>
+            </div>
+            
+            <!-- File Number -->
+            <div>
+                <label for="id_file_number" class="block text-sm font-medium text-gray-700">File Number</label>
+                <div class="mt-1">
+                    <input type="text" name="file_number" id="id_file_number" value="{{ form.file_number.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                </div>
+                {% if form.file_number.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.file_number.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- IPPIS Number -->
+            <div>
+                <label for="id_ippis_number" class="block text-sm font-medium text-gray-700">IPPIS Number</label>
+                <div class="mt-1">
+                    <input type="text" name="ippis_number" id="id_ippis_number" value="{{ form.ippis_number.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                </div>
+                {% if form.ippis_number.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.ippis_number.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Employee Type -->
+            <div>
+                <label for="id_current_employee_type" class="block text-sm font-medium text-gray-700">Employee Type</label>
+                <div class="mt-1">
+                    <select name="current_employee_type" id="id_current_employee_type" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                        <option value="">Select</option>
+                        {% for value, label in form.fields.current_employee_type.choices %}
+                        <option value="{{ value }}" {% if form.current_employee_type.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if form.current_employee_type.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.current_employee_type.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Department -->
+            <div>
+                <label for="id_current_department" class="block text-sm font-medium text-gray-700">Department</label>
+                <div class="mt-1">
+                    <select name="current_department" id="id_current_department" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                        <option value="">Select</option>
+                        {% for department in form.fields.current_department.queryset %}
+                        <option value="{{ department.id }}" {% if form.current_department.value == department.id %}selected{% endif %}>{{ department.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if form.current_department.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.current_department.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Unit -->
+            <div>
+                <label for="id_current_unit" class="block text-sm font-medium text-gray-700">Unit</label>
+                <div class="mt-1">
+                    <select name="current_unit" id="id_current_unit" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        <option value="">Select Department First</option>
+                        {% if form.current_unit.value %}
+                        <option value="{{ form.current_unit.value }}" selected>Current Unit</option>
+                        {% endif %}
+                    </select>
+                </div>
+                {% if form.current_unit.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.current_unit.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Designation -->
+            <div>
+                <label for="id_current_designation" class="block text-sm font-medium text-gray-700">Designation</label>
+                <div class="mt-1">
+                    <input type="text" name="current_designation" id="id_current_designation" value="{{ form.current_designation.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                </div>
+                {% if form.current_designation.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.current_designation.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Grade Level and Step -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mt-6">Grade and Step</h3>
+            </div>
+            
+            <!-- Grade Level -->
+            <div>
+                <label for="id_current_grade_level" class="block text-sm font-medium text-gray-700">Grade Level</label>
+                <div class="mt-1">
+                    <input type="number" name="current_grade_level" id="id_current_grade_level" min="1" max="17" value="{{ form.current_grade_level.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                    <p class="mt-1 text-xs text-gray-500">Grade level (1-17, excluding 11)</p>
+                </div>
+                {% if form.current_grade_level.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.current_grade_level.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Step -->
+            <div>
+                <label for="id_current_step" class="block text-sm font-medium text-gray-700">Step</label>
+                <div class="mt-1">
+                    <input type="number" name="current_step" id="id_current_step" min="1" max="15" value="{{ form.current_step.value|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                    <p class="mt-1 text-xs text-gray-500">Step within grade level (1-15)</p>
+                </div>
+                {% if form.current_step.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.current_step.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Employment Dates -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mt-6">Employment Dates</h3>
+            </div>
+            
+            <!-- Date of Appointment -->
+            <div>
+                <label for="id_date_of_appointment" class="block text-sm font-medium text-gray-700">Date of Appointment</label>
+                <div class="mt-1">
+                    <input type="date" name="date_of_appointment" id="id_date_of_appointment" value="{{ form.date_of_appointment.value|date:'Y-m-d'|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                    <p class="mt-1 text-xs text-gray-500">Date on appointment letter</p>
+                </div>
+                {% if form.date_of_appointment.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.date_of_appointment.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Date of Assumption -->
+            <div>
+                <label for="id_date_of_assumption" class="block text-sm font-medium text-gray-700">Date of Assumption</label>
+                <div class="mt-1">
+                    <input type="date" name="date_of_assumption" id="id_date_of_assumption" value="{{ form.date_of_assumption.value|date:'Y-m-d'|default:'' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                    <p class="mt-1 text-xs text-gray-500">Date employee assumed duty</p>
+                </div>
+                {% if form.date_of_assumption.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.date_of_assumption.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="pt-5 border-t border-gray-200">
+            <div class="flex justify-end">
+                <a href="{% url 'staff_list' %}" class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Cancel
+                </a>
+                <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Create Employee
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Handle unit selection based on department
+    document.getElementById('id_current_department').addEventListener('change', function() {
+        const departmentId = this.value;
+        const unitSelect = document.getElementById('id_current_unit');
+        
+        // Clear current options
+        unitSelect.innerHTML = '<option value="">Select Unit</option>';
+        
+        if (departmentId) {
+            // Fetch units for selected department
+            fetch(`{% url 'ajax_units' %}?department_id=${departmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Add units to dropdown
+                    data.units.forEach(unit => {
+                        const option = document.createElement('option');
+                        option.value = unit.id;
+                        option.textContent = unit.name;
+                        unitSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching units:', error));
+        }
+    });
+    
+    // Validate grade level (cannot be 11)
+    document.getElementById('id_current_grade_level').addEventListener('change', function() {
+        if (this.value == 11) {
+            alert('Grade level 11 is not allowed.');
+            this.value = '';
+        }
+    });
+    
+    // Trigger department change if value is already selected (e.g., form validation failed)
+    if (document.getElementById('id_current_department').value) {
+        document.getElementById('id_current_department').dispatchEvent(new Event('change'));
+    }
+</script>
+{% endblock %}

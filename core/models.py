@@ -311,4 +311,4 @@ class Newsletter(models.Model):
         return self.title
 
     class Meta:
-        ordering = ['-publish_date']  # Show newest newsletters first
+        ordering = ['-publish_date']  

@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'core',
+    'hr_modules',
+    'task_management',
+    'file_management',
     'crispy_forms',
     'crispy_tailwind',
     'import_export',

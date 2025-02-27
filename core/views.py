@@ -12,128 +12,272 @@ from django.contrib.auth.models import Group
 from django.http import HttpResponseForbidden
 from django.contrib.auth import logout
 
-class CustomLoginView(LoginView):
-    form_class = CustomLoginForm
-    template_name = 'login.html'
-    redirect_authenticated_user = True
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import timedelta
 
-    def get_success_url(self):
-        return reverse_lazy('home')
-
-def logout_view(request):
-    if request.user.is_authenticated:
-        logout(request)
-        messages.success(request, "You have been logged out successfully.")
-    return redirect('login')
-
-
-class HomeView(LoginRequiredMixin, View):  # Require login for the home view
-    def get(self, request):
-        # Get the latest 3 newsletters for the homepage
-        newsletters = Newsletter.objects.all()[:3]
-        context = {
-            'newsletters': newsletters,
-        }
-        return render(request, 'home.html', context)
+from .models import EmployeeProfile, Department, Unit
+from hr_modules.models import (
+    Training, TrainingParticipant, 
+    LeaveRequest, LeaveBalance, 
+    Examination, ExaminationParticipant,
+    PromotionCycle, PromotionNomination,
+    TransferRequest, EducationalUpgrade, RetirementPlan
+)
+from task_management.models import Task, TaskStatus, TaskPriority
+from file_management.models import File
 
 
-
-class EmployeeProfileUpdateView(LoginRequiredMixin, View):
-    def get(self, request):
-        profile = get_object_or_404(EmployeeProfile, user=request.user)
-        profile_form = EmployeeProfileForm(instance=profile)
-        detail, created = EmployeeDetail.objects.get_or_create(employee_profile=profile)
-        detail_form = EmployeeDetailForm(instance=detail)
-        education_formset = EducationFormSet(instance=profile)
-
-        context = {
-            'profile_form': profile_form,
-            'detail_form': detail_form,
-            'education_formset': education_formset,
-        }
-        return render(request, 'core/employee_profile_form.html', context)
-
-
-    def post(self, request):
-        profile = get_object_or_404(EmployeeProfile, user=request.user)
-        profile_form = EmployeeProfileForm(request.POST, request.FILES, instance=profile)
-        detail, created = EmployeeDetail.objects.get_or_create(employee_profile=profile)
-        detail_form = EmployeeDetailForm(request.POST, instance=detail)
-        education_formset = EducationFormSet(request.POST, instance=profile)
-
-        if profile_form.is_valid() and detail_form.is_valid() and education_formset.is_valid():
-            profile_form.save()
-            detail_form.save()
-            education_formset.save()
-            messages.success(request, "Your profile has been updated successfully!")
-            return redirect('home')  # Or redirect to a profile view
-        else:
-            messages.error(request, "Please correct the errors below.")
-            context = {
-                'profile_form': profile_form,
-                'detail_form': detail_form,
-                'education_formset': education_formset
-            }
-            return render(request, 'core/employee_profile_form.html', context)
-
-
-# --- Newsletter Views ---
-class NewsletterListView(LoginRequiredMixin,  ListView):
-    model = Newsletter
-    template_name = 'core/newsletter_list.html'
-    context_object_name = 'newsletters'
-    paginate_by = 10
-
-class NewsletterCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    model = Newsletter
-    form_class = NewsletterForm
-    template_name = 'core/newsletter_form.html'
-    success_url = reverse_lazy('newsletter_list')
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user  # Set the author
-        messages.success(self.request, "Newsletter created successfully!")
-        return super().form_valid(form)
-
-    def test_func(self):
-        return self.request.user.groups.filter(name='Information and Publications').exists() or self.request.user.is_superuser
+@login_required
+def dashboard(request):
+    """Main dashboard view showing key metrics and recent activities"""
+    today = timezone.now().date()
+    user = request.user
+    employee_profile = user.employee_profile
     
-    def handle_no_permission(self):
-        return HttpResponseForbidden("You do not have permission to view this page.")
-
-
-class NewsletterUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Newsletter
-    form_class = NewsletterForm
-    template_name = 'core/newsletter_form.html'
-    success_url = reverse_lazy('newsletter_list')
-
-    def form_valid(self, form):
-        messages.success(self.request, "Newsletter updated successfully!")
-        return super().form_valid(form)
+    # Employee stats
+    employee_count = EmployeeProfile.objects.filter(user__is_active=True).count()
+    new_employees = EmployeeProfile.objects.filter(
+        date_of_assumption__gte=today - timedelta(days=30),
+        user__is_active=True
+    ).count()
     
-    def test_func(self):
-        return self.request.user.groups.filter(name='Information and Publications').exists() or self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return HttpResponseForbidden("You do not have permission to view this page.")
-
-
-class NewsletterDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model = Newsletter
-    template_name = 'core/newsletter_confirm_delete.html'  # You'll need this template
-    success_url = reverse_lazy('newsletter_list')
-
-    def form_valid(self, form):
-        messages.success(self.request, "Newsletter Deleted successfully!")
-        return super().form_valid(form)
-
-    def test_func(self):
-        return self.request.user.groups.filter(name='Information and Publications').exists() or self.request.user.is_superuser
+    # Leave stats
+    pending_leaves = LeaveRequest.objects.filter(status='PENDING').count()
+    approved_leaves = LeaveRequest.objects.filter(
+        status='APPROVED',
+        approved_date__gte=today - timedelta(days=30)
+    ).count()
     
-    def handle_no_permission(self):
-        return HttpResponseForbidden("You do not have permission to view this page.")
+    # My tasks
+    my_tasks = Task.objects.filter(
+        assigned_to=employee_profile,
+        status__is_completed=False
+    ).select_related('status', 'priority').order_by('due_date')[:5]
+    
+    my_tasks_count = Task.objects.filter(
+        assigned_to=employee_profile,
+        status__is_completed=False
+    ).count()
+    
+    overdue_tasks = Task.objects.filter(
+        assigned_to=employee_profile,
+        status__is_completed=False,
+        due_date__lt=today
+    ).count()
+    
+    # Training stats
+    upcoming_trainings = Training.objects.filter(
+        start_date__gte=today,
+        status='UPCOMING'
+    ).count()
+    
+    ongoing_trainings = Training.objects.filter(
+        start_date__lte=today,
+        end_date__gte=today,
+        status='ONGOING'
+    ).count()
+    
+    # Available trainings
+    available_trainings = Training.objects.filter(
+        Q(status='UPCOMING') | Q(status='ONGOING'),
+        start_date__gte=today - timedelta(days=7)
+    ).order_by('start_date')[:3]
+    
+    # My leave balances
+    leave_balances = LeaveBalance.objects.filter(
+        employee=employee_profile,
+        year=today.year
+    ).select_related('leave_type')
+    
+    # Recent files
+    recent_files = File.objects.filter(
+        status='ACTIVE'
+    ).select_related('created_by').order_by('-created_at')[:5]
+    
+    # Upcoming events - combine trainings, exams, etc.
+    upcoming_events = []
+    
+    # Add trainings
+    for training in Training.objects.filter(
+        start_date__gte=today,
+        start_date__lte=today + timedelta(days=30)
+    ).order_by('start_date')[:3]:
+        upcoming_events.append({
+            'title': f"Training: {training.title}",
+            'description': f"Location: {training.location}",
+            'date': training.start_date,
+        })
+    
+    # Add exams
+    for exam in Examination.objects.filter(
+        scheduled_date__gte=today,
+        scheduled_date__lte=today + timedelta(days=30)
+    ).order_by('scheduled_date')[:3]:
+        upcoming_events.append({
+            'title': f"Exam: {exam.title}",
+            'description': f"Venue: {exam.venue}",
+            'date': exam.scheduled_date,
+        })
+    
+    # Add approved leave dates
+    for leave in LeaveRequest.objects.filter(
+        employee=employee_profile,
+        status='APPROVED',
+        start_date__gte=today
+    ).order_by('start_date')[:3]:
+        upcoming_events.append({
+            'title': f"Leave: {leave.leave_type.name}",
+            'description': f"{leave.start_date} to {leave.end_date}",
+            'date': leave.start_date,
+        })
+    
+    # Sort all events by date
+    upcoming_events.sort(key=lambda x: x['date'])
+    
+    # Get only the next 5 events
+    upcoming_events = upcoming_events[:5]
+    
+    context = {
+        'employee_count': employee_count,
+        'new_employees': new_employees,
+        'pending_leaves': pending_leaves,
+        'approved_leaves': approved_leaves,
+        'my_tasks': my_tasks,
+        'my_tasks_count': my_tasks_count,
+        'overdue_tasks': overdue_tasks,
+        'upcoming_trainings': upcoming_trainings,
+        'ongoing_trainings': ongoing_trainings,
+        'available_trainings': available_trainings,
+        'leave_balances': leave_balances,
+        'recent_files': recent_files,
+        'upcoming_events': upcoming_events,
+    }
+    
+    return render(request, 'dashboard.html', context)
 
-class NewsletterDetailView(LoginRequiredMixin, DetailView):
-    model=Newsletter
-    template_name = 'core/newsletter_detail.html'
+
+@login_required
+def profile(request):
+    """User profile view"""
+    user = request.user
+    employee_profile = user.employee_profile
+    
+    # Get related records
+    trainings = TrainingParticipant.objects.filter(
+        employee=employee_profile
+    ).select_related('training').order_by('-training__start_date')[:5]
+    
+    leave_requests = LeaveRequest.objects.filter(
+        employee=employee_profile
+    ).order_by('-created_at')[:5]
+    
+    examinations = ExaminationParticipant.objects.filter(
+        employee=employee_profile
+    ).select_related('examination').order_by('-examination__scheduled_date')[:5]
+    
+    promotions = PromotionNomination.objects.filter(
+        employee=employee_profile
+    ).select_related('promotion_cycle').order_by('-promotion_cycle__year')[:5]
+    
+    transfers = TransferRequest.objects.filter(
+        employee=employee_profile
+    ).order_by('-created_at')[:5]
+    
+    educational_upgrades = EducationalUpgrade.objects.filter(
+        employee=employee_profile
+    ).order_by('-submission_date')[:5]
+    
+    # Try to get retirement plan
+    try:
+        retirement_plan = RetirementPlan.objects.get(employee=employee_profile)
+    except RetirementPlan.DoesNotExist:
+        retirement_plan = None
+    
+    context = {
+        'employee_profile': employee_profile,
+        'trainings': trainings,
+        'leave_requests': leave_requests,
+        'examinations': examinations,
+        'promotions': promotions,
+        'transfers': transfers,
+        'educational_upgrades': educational_upgrades,
+        'retirement_plan': retirement_plan,
+    }
+    
+    return render(request, 'profile.html', context)
+
+
+@login_required
+def profile_edit(request):
+    """Edit user profile"""
+    user = request.user
+    employee_profile = user.employee_profile
+    
+    if request.method == 'POST':
+        # Handle form submission - update profile fields that are editable by the user
+        employee_profile.phone_number = request.POST.get('phone_number', employee_profile.phone_number)
+        employee_profile.contact_address = request.POST.get('contact_address', employee_profile.contact_address)
+        
+        # Update user fields
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.email = request.POST.get('email', user.email)
+        
+        # Save changes
+        employee_profile.save()
+        user.save()
+        
+        messages.success(request, 'Profile updated successfully')
+        return redirect('profile')
+    
+    context = {
+        'employee_profile': employee_profile,
+    }
+    
+    return render(request, 'profile_edit.html', context)
+
+
+@login_required
+def department_detail(request, pk):
+    """View department details including employees"""
+    department = get_object_or_404(Department, pk=pk)
+    
+    # Get employees in this department
+    employees = EmployeeProfile.objects.filter(
+        current_department=department,
+        user__is_active=True
+    ).select_related('user', 'current_designation')
+    
+    # Get units in this department
+    units = Unit.objects.filter(department=department)
+    
+    # Get child departments
+    child_departments = Department.objects.filter(parent=department)
+    
+    context = {
+        'department': department,
+        'employees': employees,
+        'units': units,
+        'child_departments': child_departments,
+    }
+    
+    return render(request, 'department_detail.html', context)
+
+
+@login_required
+def employee_detail(request, pk):
+    """View employee details"""
+    employee_profile = get_object_or_404(EmployeeProfile, pk=pk)
+    
+    # Check if user has permission to view this employee
+    # This would use the permission system we defined
+    
+    context = {
+        'employee_profile': employee_profile,
+    }
+    
+    return render(request, 'employee_detail.html', context) 

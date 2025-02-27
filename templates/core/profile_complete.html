@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Complete Your Profile - HR Management System{% endblock %}
+
+{% block page_title %}Complete Your Profile{% endblock %}
+{% block page_subtitle %}Please provide your personal information to complete your employee record{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="mb-6">
+        <div class="flex items-center space-x-3 text-gray-500">
+            <div class="flex items-center space-x-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Your profile must be completed and verified before you can access all system features.</span>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Personal Information -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 border-b pb-2">Personal Information</h3>
+            </div>
+
+            <!-- First Name -->
+            <div>
+                {{ form.first_name|as_crispy_field }}
+            </div>
+
+            <!-- Last Name -->
+            <div>
+                {{ form.last_name|as_crispy_field }}
+            </div>
+
+            <!-- Middle Name -->
+            <div>
+                {{ form.middle_name|as_crispy_field }}
+            </div>
+
+            <!-- Email -->
+            <div>
+                {{ form.email|as_crispy_field }}
+            </div>
+
+            <!-- Sex -->
+            <div>
+                {{ form.sex|as_crispy_field }}
+            </div>
+
+            <!-- Marital Status -->
+            <div>
+                {{ form.marital_status|as_crispy_field }}
+            </div>
+
+            <!-- Date of Birth -->
+            <div>
+                {{ form.date_of_birth|as_crispy_field }}
+            </div>
+
+            <!-- Phone Number -->
+            <div>
+                {{ form.phone_number|as_crispy_field }}
+            </div>
+
+            <!-- Contact Address -->
+            <div class="md:col-span-2">
+                {{ form.contact_address|as_crispy_field }}
+            </div>
+
+            <!-- Residence Information -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mt-6">Residence Information</h3>
+            </div>
+
+            <!-- State of Residence -->
+            <div>
+                {{ form.state_of_residence|as_crispy_field }}
+            </div>
+
+            <!-- LGA of Residence -->
+            <div>
+                {{ form.lga_of_residence|as_crispy_field }}
+            </div>
+
+            <!-- State of Origin -->
+            <div>
+                {{ form.state_of_origin|as_crispy_field }}
+            </div>
+
+            <!-- LGA of Origin -->
+            <div>
+                {{ form.lga_of_origin|as_crispy_field }}
+            </div>
+
+            <!-- Identification -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mt-6">Identification</h3>
+            </div>
+
+            <!-- NIN -->
+            <div>
+                {{ form.nin|as_crispy_field }}
+            </div>
+
+            <!-- BRN -->
+            <div>
+                {{ form.brn|as_crispy_field }}
+            </div>
+
+            <!-- Profile Picture -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mt-6">Profile Picture</h3>
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="id_profile_picture" class="block text-sm font-medium text-gray-700">Upload Profile Picture</label>
+                <div class="mt-1 flex items-center space-x-4">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center border">
+                        {% if form.profile_picture.value %}
+                        <img id="profile_preview" src="{{ form.profile_picture.value.url }}" alt="Profile Preview" class="w-full h-full object-cover">
+                        {% else %}
+                        <img id="profile_preview" src="{% static 'img/default-profile.png' %}" alt="Profile Preview" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <input type="file" name="profile_picture" id="id_profile_picture" accept="image/*" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300">
+                        <p class="mt-1 text-sm text-gray-500">
+                            Upload a profile picture (max size: 20KB). Image will be automatically resized if needed.
+                        </p>
+                    </div>
+                </div>
+                {% if form.profile_picture.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.profile_picture.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="pt-5 border-t border-gray-200">
+            <div class="flex justify-end">
+                <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Complete Profile
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview profile picture
+    document.getElementById('id_profile_picture').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            document.getElementById('profile_preview').src = event.target.result;
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle LGA selection based on state
+    document.getElementById('id_state_of_residence').addEventListener('change', function() {
+        const stateId = this.value;
+        const lgaSelect = document.getElementById('id_lga_of_residence');
+
+        // Clear current options
+        lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+
+        if (stateId) {
+            // Fetch LGAs for selected state
+            fetch(`{% url 'ajax_lgas' %}?state_id=${stateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Add LGAs to dropdown
+                    data.lgas.forEach(lga => {
+                        const option = document.createElement('option');
+                        option.value = lga.id;
+                        option.textContent = lga.name;
+                        lgaSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching LGAs:', error));
+        }
+    });
+    document.getElementById('id_state_of_origin').addEventListener('change', function() {
+        const stateId = this.value;
+        const lgaSelect = document.getElementById('id_lga_of_origin');
+
+        // Clear current options
+        lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+
+        if (stateId) {
+            // Fetch LGAs for selected state
+            fetch(`{% url 'ajax_lgas' %}?state_id=${stateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Add LGAs to dropdown
+                    data.lgas.forEach(lga => {
+                        const option = document.createElement('option');
+                        option.value = lga.id;
+                        option.textContent = lga.name;
+                        lgaSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching LGAs:', error));
+        }
+    });
+
+    // Trigger state change if values are already selected (e.g., form validation failed)
+    if (document.getElementById('id_state_of_residence').value) {
+        document.getElementById('id_state_of_residence').dispatchEvent(new Event('change'));
+    }
+    if (document.getElementById('id_state_of_origin').value) {
+        document.getElementById('id_state_of_origin').dispatchEvent(new Event('change'));
+    }
+</script>
+{% endblock %}
