@@ -9,10 +9,10 @@ from .onboarding_views import (
 
 urlpatterns = [
     # Dashboard
-    path('', views.dashboard, name='dashboard'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     
     # Authentication
-    path('login/', login_view, name='login'),
+    path('', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('change-password/', change_password, name='change_password'),
     path('password-reset/', password_reset_request, name='password_reset'),

@@ -166,7 +166,8 @@ EMAIL_HOST_PASSWORD = '@info.nde'
 DEFAULT_FROM_EMAIL = 'no-reply@nde-internal.org.ng' 
 
 # Add the below line
-LOGIN_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "login"
 
 # Add for shell plus
 SHELL_PLUS_PRINT_SQL = True

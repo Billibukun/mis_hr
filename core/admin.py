@@ -13,9 +13,11 @@ from import_export.results import RowResult
 
 from .models import (
     Department, Unit, Zone, State, LGA, Bank, PFA, 
-    Designation, EmployeeProfile, EmployeeDetail
+    Designation, EmployeeProfile, EmployeeDetail,
+    EducationalQualification, Newsletter
 )
 from .verification_model import EmployeeVerification, AutomatedCheck, VerificationLog
+from .permissions import Role, UserRole, AttributeBasedPermission
 
 import logging
 
@@ -265,6 +267,12 @@ class VerificationInline(admin.StackedInline):
     extra = 0
 
 
+class EducationalQualificationInline(admin.TabularInline):
+    model = EducationalQualification
+    extra = 1
+    fields = ('qualification_type', 'course_of_study', 'area_of_study', 'institution', 'year_of_graduation')
+
+
 # --- Custom User Admin ---
 class UserAdmin(ImportExportModelAdmin, BaseUserAdmin):
     resource_class = UserResource
@@ -304,7 +312,7 @@ class EmployeeProfileAdmin(ImportExportModelAdmin):
     list_filter = ('current_employee_type', 'current_department', 'current_zone', 'current_state', 'is_profile_completed')
     search_fields = ('file_number', 'user__username', 'user__first_name', 'user__last_name')
     readonly_fields = ('created_at', 'modified_at', 'created_by', 'modified_by')
-    inlines = (EmployeeDetailInline, VerificationInline)
+    inlines = (EmployeeDetailInline, VerificationInline, EducationalQualificationInline)
 
     def get_user_active(self, obj):
         return obj.user.is_active
@@ -416,6 +424,66 @@ class VerificationLogAdmin(admin.ModelAdmin):
     search_fields = ('verification__employee_profile__user__username', 'details')
     readonly_fields = ('timestamp',)
 
+
+@admin.register(EducationalQualification)
+class EducationalQualificationAdmin(admin.ModelAdmin):
+    list_display = ('employee_profile', 'qualification_type', 'course_of_study', 'institution', 'year_of_graduation')
+    list_filter = ('qualification_type', 'year_of_graduation')
+    search_fields = ('employee_profile__user__username', 'course_of_study', 'institution')
+
+
+@admin.register(Newsletter)
+class NewsletterAdmin(admin.ModelAdmin):
+    list_display = ('title', 'publish_date', 'author')
+    list_filter = ('publish_date', 'author')
+    search_fields = ('title', 'content')
+    date_hierarchy = 'publish_date'
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role_type', 'hierarchy_level')
+    list_filter = ('role_type',)
+    # Remove the incorrect filter_horizontal = ('group',) line
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description', 'role_type', 'hierarchy_level', 'group')
+        }),
+        ('Permissions', {
+            'fields': (
+                'can_manage_users', 'can_manage_departments', 'can_manage_roles',
+                'can_manage_trainings', 'can_approve_trainings', 'can_manage_leaves',
+                'can_approve_leaves', 'can_manage_examinations', 'can_manage_promotions',
+                'can_approve_promotions', 'can_manage_transfers', 'can_approve_transfers',
+                'can_manage_educational_upgrades', 'can_approve_educational_upgrades',
+                'can_manage_retirements'
+            )
+        }),
+        ('Task Management', {
+            'fields': ('can_create_tasks', 'can_assign_tasks', 'can_view_all_tasks', 'can_manage_workflows')
+        }),
+        ('File Management', {
+            'fields': ('can_manage_files', 'can_view_all_files', 'can_manage_file_permissions')
+        }),
+        ('Reporting', {
+            'fields': ('can_view_reports', 'can_create_reports', 'can_export_data')
+        }),
+    )
+
+
+@admin.register(UserRole)
+class UserRoleAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role', 'scope_type', 'is_primary', 'is_active', 'assigned_by')
+    list_filter = ('role', 'is_primary', 'is_active', 'scope_type')
+    search_fields = ('user__username', 'user__first_name', 'user__last_name')
+    raw_id_fields = ('user', 'role', 'assigned_by')
+
+
+@admin.register(AttributeBasedPermission)
+class AttributeBasedPermissionAdmin(admin.ModelAdmin):
+    list_display = ('role', 'model_name', 'field_name', 'condition_type', 'permission_action')
+    list_filter = ('role', 'permission_action', 'condition_type')
+    search_fields = ('model_name', 'field_name', 'condition_value')
 
 # Re-register User model
 admin.site.unregister(User)

@@ -46,22 +46,33 @@ def profile_complete(request):
         messages.info(request, "Your profile is already completed.")
         return redirect('dashboard')
     
+    # Get the existing employee profile
+    try:
+        profile = user.employee_profile
+    except EmployeeProfile.DoesNotExist:
+        # This should not happen since the post_save signal should create a profile
+        # But just in case, create one now
+        profile = EmployeeProfile.objects.create(user=user)
+    
     if request.method == 'POST':
-        form = ProfileCompleteForm(request.POST, request.FILES, user=user)
+        # Pass the existing profile instance to the form
+        form = ProfileCompleteForm(request.POST, request.FILES, user=user, instance=profile)
         if form.is_valid():
             # Save profile data
-            profile = form.save()
+            profile = form.save(commit=False)
+            profile.is_profile_completed = True
+            profile.save()
             
-            # Create verification record
-            verification = EmployeeVerification.objects.create(
+            # Create verification record if it doesn't exist
+            verification, created = EmployeeVerification.objects.get_or_create(
                 employee_profile=profile,
-                verification_status='PENDING'
+                defaults={'verification_status': 'PENDING'}
             )
             
             # Log the event
             VerificationLog.objects.create(
                 verification=verification,
-                action='CREATED',
+                action='CREATED' if created else 'UPDATED',
                 performed_by=user,
                 details="Employee completed profile"
             )
@@ -72,7 +83,8 @@ def profile_complete(request):
             messages.success(request, "Your profile has been completed successfully. It is now pending verification by HR.")
             return redirect('dashboard')
     else:
-        form = ProfileCompleteForm(user=user)
+        # Initialize form with existing profile data
+        form = ProfileCompleteForm(user=user, instance=profile)
     
     return render(request, 'core/profile_complete.html', {
         'form': form,
@@ -185,7 +197,11 @@ def staff_bulk_upload(request):
                     )
                     
                     # Get employee profile (created automatically by signal)
-                    profile = EmployeeProfile.objects.get(user=user)
+                    try:
+                        profile = user.employee_profile
+                    except EmployeeProfile.DoesNotExist:
+                        # If profile wasn't created by signal, create it now
+                        profile = EmployeeProfile.objects.create(user=user)
                     
                     # Update profile with basic info
                     profile.file_number = row['file_number']
