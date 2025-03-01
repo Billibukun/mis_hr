@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Q, Count, Case, When, Value, IntegerField
+from django.db.models import Q, F, Count, Case, When, Value, IntegerField
 from django.http import JsonResponse, HttpResponse
 
 from .models import (
@@ -64,7 +64,7 @@ def task_list(request):
             default=Value(0),
             output_field=IntegerField(),
         )
-    ).order_by('-overdue_order', '-priority_order', 'due_date')
+    ).order_by('-overdue_order', '-    ', 'due_date')
     
     # Apply filters
     if status_id:
@@ -207,6 +207,8 @@ def task_detail(request, pk):
 @login_required
 def task_create(request):
     """Create a new task"""
+    workflow = get_object_or_404(Workflow)
+    
     if not request.user.user_permissions.get('can_create_tasks', False):
         messages.error(request, "You don't have permission to create tasks.")
         return redirect('task_management:task_list')

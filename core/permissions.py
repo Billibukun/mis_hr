@@ -77,7 +77,27 @@ class Role(models.Model):
         permission_mapping = {
             'can_manage_users': ['add_user', 'change_user', 'view_user', 'delete_user'],
             'can_manage_departments': ['add_department', 'change_department', 'view_department', 'delete_department'],
-            # ... add more mappings for other boolean fields
+            'can_manage_roles': ['add_role', 'change_role', 'view_role', 'delete_role'],
+            'can_manage_trainings': ['add_training', 'change_training', 'view_training', 'delete_training'],
+            'can_approve_trainings': ['change_trainingparticipant', 'view_trainingparticipant'],
+            'can_manage_leaves': ['add_leaverequest', 'change_leaverequest', 'view_leaverequest', 'delete_leaverequest'],
+            'can_approve_leaves': ['change_leaverequest', 'view_leaverequest'],
+            'can_manage_examinations': ['add_examination', 'change_examination', 'view_examination', 'delete_examination'],
+            'can_manage_promotions': ['add_promotioncycle', 'change_promotioncycle', 'view_promotioncycle', 'delete_promotioncycle'],
+            'can_approve_promotions': ['change_promotionnomination', 'view_promotionnomination'],
+            'can_manage_transfers': ['add_transferrequest', 'change_transferrequest', 'view_transferrequest', 'delete_transferrequest'],
+            'can_approve_transfers': ['change_transferrequest', 'view_transferrequest'],
+            'can_manage_educational_upgrades': ['add_educationalupgrade', 'change_educationalupgrade', 'view_educationalupgrade', 'delete_educationalupgrade'],
+            'can_approve_educational_upgrades': ['change_educationalupgrade', 'view_educationalupgrade'],
+            'can_manage_retirements': ['add_retirementplan', 'change_retirementplan', 'view_retirementplan', 'delete_retirementplan'],
+            'can_create_tasks': ['add_task', 'change_task', 'view_task'],
+            'can_assign_tasks': ['change_task', 'view_task'],
+            'can_view_all_tasks': ['view_task'],
+            'can_manage_workflows': ['add_workflow', 'change_workflow', 'view_workflow', 'delete_workflow'],
+            'can_manage_files': ['add_file', 'change_file', 'view_file', 'delete_file'],
+            'can_view_all_files': ['view_file'],
+            'can_manage_file_permissions': ['add_filesharepermission', 'change_filesharepermission', 'view_filesharepermission', 'delete_filesharepermission'],
+            'can_export_data': ['view_fileaccesslog', 'view_taskaccesslog'],
         }
         
         # Clear existing permissions
@@ -211,10 +231,10 @@ class AttributeBasedPermission(models.Model):
             return ~Q(**{self.field_name: value})
         elif self.condition_type == 'IN':
             # Assume value is a comma-separated list
-            values = [v.strip() for v in value.split(',')]
+            values = [v.strip() for v in value.split(',')] if isinstance(value, str) else value
             return Q(**{f"{self.field_name}__in": values})
         elif self.condition_type == 'NOT_IN':
-            values = [v.strip() for v in value.split(',')]
+            values = [v.strip() for v in value.split(',')] if isinstance(value, str) else value
             return ~Q(**{f"{self.field_name}__in": values})
         elif self.condition_type == 'GREATER_THAN':
             return Q(**{f"{self.field_name}__gt": value})
