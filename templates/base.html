@@ -5,148 +5,430 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}NDE HR Management System{% endblock %}</title>
     {% load static %}
-    <link href="{% static 'src/output.css' %}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'logos/logo.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="{% static 'logos/favicon.ico' %}" type="image/x-icon">
     {% block extra_css %}{% endblock %}
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.3/dist/cdn.min.js" defer></script>
     <style>
+        /* NDE Color Scheme */
         :root {
-            --primary-green: #4CAF50;
-            --primary-black: #000000;
-            --primary-yellow: #FFE500;
-            --primary-red: #E53935;
-            --primary-white: #FFFFFF;
+            --nde-green: #4CA64C;
+            --nde-black: #000000;
+            --nde-yellow: #FFEB3B;
+            --nde-red: #E53935;
+            --nde-white: #FFFFFF;
         }
-        .bg-nde-green { background-color: var(--primary-green); }
-        .bg-nde-yellow { background-color: var(--primary-yellow); }
-        .bg-nde-red { background-color: var(--primary-red); }
-        .text-nde-green { color: var(--primary-green); }
-        .text-nde-yellow { color: var(--primary-yellow); }
-        .text-nde-red { color: var(--primary-red); }
-        .border-nde-green { border-color: var(--primary-green); }
-        .border-nde-yellow { border-color: var(--primary-yellow); }
-        .border-nde-red { border-color: var(--primary-red); }
+        
+        .sidebar {
+            background-color: var(--nde-black);
+            color: var(--nde-white);
+        }
+        
+        .sidebar-link {
+            border-left: 4px solid transparent;
+        }
+        
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--nde-green);
+        }
+        
+        .main-header {
+            background-color: var(--nde-white);
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .btn-primary {
+            background-color: var(--nde-green);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a873a;
+        }
+        
+        /* Hide sidebar on mobile by default */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        /* Dropdown menu */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            z-index: 50;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
-    {% if user.is_authenticated and request.path != '/login/' %}
-    <!-- Header/Navbar -->
-    <header class="bg-white border-b border-gray-200">
-        <div class="container mx-auto px-4 py-2">
-            <div class="flex justify-between items-center">
-                <!-- Logo and Brand -->
-                <div class="flex items-center space-x-4">
-                    <a href="{% url 'dashboard' %}" class="flex items-center">
-                        <img src="{% static 'logos/logo.png' %}" alt="NDE Logo" class="h-12">
-                        <span class="ml-2 text-xl font-semibold text-gray-800">NDE HR System</span>
-                    </a>
-                </div>
-                
-                <!-- Navigation -->
-                <nav class="hidden md:flex space-x-6">
-                    <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-nde-green font-medium">Dashboard</a>
-                    
-                    {% if user_permissions.can_manage_employees or user_permissions.can_view_employees %}
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="text-gray-700 hover:text-nde-green font-medium flex items-center">
-                            Employee Management
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div x-show="open" @click.away="open = false" class="absolute z-10 left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                            <a href="{% url 'staff_list' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Staff Directory</a>
-                            {% if user_permissions.can_manage_employees %}
-                            <a href="{% url 'staff_onboarding' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Staff Onboarding</a>
-                            <a href="{% url 'staff_bulk_upload' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Bulk Upload</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    {% if user_permissions.can_manage_leaves or user_permissions.can_approve_leaves %}
-                    <a href="{% url 'hr_modules:leave_list' %}" class="text-gray-700 hover:text-nde-green font-medium">Leave Management</a>
-                    {% endif %}
-                    
-                    {% if user_permissions.can_manage_trainings or user_permissions.can_approve_trainings %}
-                    <a href="{% url 'hr_modules:training_list' %}" class="text-gray-700 hover:text-nde-green font-medium">Training</a>
-                    {% endif %}
-                    
-                    {% if user_permissions.can_create_tasks or user_permissions.can_view_all_tasks %}
-                    <a href="{% url 'task_management:task_list' %}" class="text-gray-700 hover:text-nde-green font-medium">Tasks</a>
-                    {% endif %}
-                    
-                    {% if user_permissions.can_manage_files or user_permissions.can_view_all_files %}
-                    <a href="{% url 'file_management:file_list' %}" class="text-gray-700 hover:text-nde-green font-medium">Files</a>
-                    {% endif %}
-                </nav>
-                
-                <!-- User Menu -->
-                <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" class="flex items-center space-x-2 text-gray-700">
-                        <span class="font-medium">{{ user.get_full_name|default:user.username }}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                        <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
-                        <a href="{% url 'change_password' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Password</a>
-                        <div class="border-t border-gray-100"></div>
-                        <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
-                    </div>
-                </div>
-                
-                <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
-                    <button type="button" class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600" aria-label="toggle menu">
-                        <svg viewBox="0 0 24 24" class="h-6 w-6 fill-current">
-                            <path fill-rule="evenodd" d="M4 5h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2z"></path>
-                        </svg>
-                    </button>
-                </div>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    {% if user.is_authenticated %}
+    <!-- Mobile Header -->
+    <header class="lg:hidden main-header flex justify-between items-center py-2 px-4 shadow-md">
+        <button id="mobile-menu-button" class="block text-gray-700">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <div class="flex items-center">
+            <img src="{% static 'logos/logo.png' %}" alt="NDE Logo" class="h-12">
+            <span class="ml-2 font-bold text-lg text-gray-800">NDE HR System</span>
+        </div>
+        <div class="relative" id="mobile-user-dropdown">
+            <button class="flex items-center focus:outline-none">
+                <span class="hidden sm:block mr-2 text-sm">{{ user.username }}</span>
+                <i class="fas fa-user-circle text-xl text-gray-700"></i>
+            </button>
+            <div class="dropdown-menu bg-white shadow-lg rounded-md py-2 w-48">
+                <a href="{% url 'profile' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                    <i class="fas fa-user mr-2"></i> Profile
+                </a>
+                <a href="{% url 'change_password' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                    <i class="fas fa-key mr-2"></i> Change Password
+                </a>
+                <div class="border-t border-gray-200 my-1"></div>
+                <a href="{% url 'logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </a>
             </div>
         </div>
     </header>
-    {% endif %}
 
-    <!-- Notification messages -->
-    {% if messages %}
-    <div class="container mx-auto px-4 py-2">
-        {% for message in messages %}
-        <div class="mb-3 p-4 rounded-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-blue-100 text-blue-700{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-6">
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    {% if user.is_authenticated and request.path != '/login/' %}
-    <footer class="bg-white border-t border-gray-200 py-4">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p class="text-gray-600 text-sm">&copy; {% now "Y" %} National Directorate of Employment. All rights reserved.</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="#" class="text-gray-600 text-sm hover:text-nde-green">Privacy Policy</a>
-                    <a href="#" class="text-gray-600 text-sm hover:text-nde-green">Terms of Service</a>
-                    <a href="#" class="text-gray-600 text-sm hover:text-nde-green">Contact Support</a>
+    <!-- Desktop Sidebar -->
+    <nav class="sidebar fixed inset-y-0 left-0 w-64 overflow-y-auto transition-transform duration-300 ease-in-out z-10 shadow-lg hidden lg:block">
+        <div class="flex flex-col h-full">
+            <!-- Logo -->
+            <div class="p-4 flex justify-center items-center border-b border-gray-700">
+                <img src="{% static 'logos/logo.png' %}" alt="NDE Logo" class="h-14">
+                <div class="ml-2">
+                    <div class="text-white font-bold text-lg">NDE</div>
+                    <div class="text-gray-400 text-xs">HR Management System</div>
                 </div>
             </div>
+            
+            <!-- Navigation Links -->
+            <div class="flex-1 overflow-y-auto pt-2">
+                <a href="{% url 'dashboard' %}" class="sidebar-link py-3 px-4 flex items-center {% if request.path == '/' %}active{% endif %}">
+                    <i class="fas fa-home w-6"></i>
+                    <span class="ml-2">Dashboard</span>
+                </a>
+                
+                {% if user.user_permissions.can_manage_users or user.is_staff %}
+                <div class="px-4 py-2 text-gray-500 text-xs font-bold uppercase mt-4">Staff Management</div>
+                <a href="{% url 'staff_list' %}" class="sidebar-link py-2 px-4 flex items-center {% if 'staff/list' in request.path %}active{% endif %}">
+                    <i class="fas fa-users w-6"></i>
+                    <span class="ml-2">Staff Directory</span>
+                </a>
+                <a href="{% url 'staff_onboarding' %}" class="sidebar-link py-2 px-4 flex items-center {% if 'staff/onboarding' in request.path %}active{% endif %}">
+                    <i class="fas fa-user-plus w-6"></i>
+                    <span class="ml-2">Onboarding</span>
+                </a>
+                <a href="{% url 'staff_bulk_upload' %}" class="sidebar-link py-2 px-4 flex items-center {% if 'staff/bulk-upload' in request.path %}active{% endif %}">
+                    <i class="fas fa-upload w-6"></i>
+                    <span class="ml-2">Bulk Upload</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_manage_trainings %}
+                <div class="px-4 py-2 text-gray-500 text-xs font-bold uppercase mt-4">HR Modules</div>
+                <a href="{% url 'hr_modules:training_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-graduation-cap w-6"></i>
+                    <span class="ml-2">Training</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_manage_leaves %}
+                <a href="{% url 'hr_modules:leave_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-calendar-alt w-6"></i>
+                    <span class="ml-2">Leave Management</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_manage_examinations %}
+                <a href="{% url 'hr_modules:examination_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-file-alt w-6"></i>
+                    <span class="ml-2">Examinations</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_manage_promotions %}
+                <a href="{% url 'hr_modules:promotion_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-award w-6"></i>
+                    <span class="ml-2">Promotions</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_manage_transfers %}
+                <a href="{% url 'hr_modules:transfer_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-exchange-alt w-6"></i>
+                    <span class="ml-2">Transfers</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_manage_educational_upgrades %}
+                <a href="{% url 'hr_modules:educational_upgrade_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-user-graduate w-6"></i>
+                    <span class="ml-2">Educational Upgrades</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_manage_retirements %}
+                <a href="{% url 'hr_modules:retirement_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-user-clock w-6"></i>
+                    <span class="ml-2">Retirement</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_create_tasks %}
+                <div class="px-4 py-2 text-gray-500 text-xs font-bold uppercase mt-4">Task Management</div>
+                <a href="{% url 'task_management:task_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-tasks w-6"></i>
+                    <span class="ml-2">My Tasks</span>
+                </a>
+                <a href="{% url 'task_management:task_dashboard' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span class="ml-2">Dashboard</span>
+                </a>
+                {% endif %}
+                
+                {% if user.user_permissions.can_manage_files %}
+                <div class="px-4 py-2 text-gray-500 text-xs font-bold uppercase mt-4">Document Management</div>
+                <a href="{% url 'file_management:file_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-file w-6"></i>
+                    <span class="ml-2">Files</span>
+                </a>
+                <a href="{% url 'file_management:folder_list' %}" class="sidebar-link py-2 px-4 flex items-center">
+                    <i class="fas fa-folder w-6"></i>
+                    <span class="ml-2">Folders</span>
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- User Profile Link -->
+            <div class="mt-auto border-t border-gray-700 p-4">
+                <a href="{% url 'profile' %}" class="flex items-center text-gray-300 hover:text-white">
+                    <div class="flex-shrink-0">
+                        {% if user.employee_profile.profile_picture %}
+                        <img src="{{ user.employee_profile.profile_picture.url }}" alt="{{ user.get_full_name }}" class="h-8 w-8 rounded-full">
+                        {% else %}
+                        <i class="fas fa-user-circle text-2xl"></i>
+                        {% endif %}
+                    </div>
+                    <div class="ml-2">
+                        <div class="text-sm font-medium">{{ user.get_full_name }}</div>
+                        <div class="text-xs text-gray-400">{{ user.username }}</div>
+                    </div>
+                </a>
+                <a href="{% url 'logout' %}" class="flex items-center mt-3 text-red-400 hover:text-red-300 text-sm">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
         </div>
-    </footer>
-    {% endif %}
+    </nav>
 
-    <!-- JavaScript -->
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-10 hidden lg:hidden"></div>
+
+    <!-- Mobile Sidebar -->
+    <nav id="mobile-sidebar" class="sidebar fixed inset-y-0 left-0 w-64 overflow-y-auto transition-transform duration-300 ease-in-out z-20 shadow-lg transform -translate-x-full lg:hidden">
+        <!-- Same content as desktop sidebar -->
+        <div class="flex flex-col h-full">
+            <div class="p-4 flex justify-center items-center border-b border-gray-700">
+                <img src="{% static 'logos/logo.png' %}" alt="NDE Logo" class="h-14">
+                <div class="ml-2">
+                    <div class="text-white font-bold text-lg">NDE</div>
+                    <div class="text-gray-400 text-xs">HR Management System</div>
+                </div>
+            </div>
+            
+            <!-- Navigation Links -->
+            <div class="flex-1 overflow-y-auto pt-2">
+                <!-- Same links as desktop sidebar -->
+                <a href="{% url 'dashboard' %}" class="sidebar-link py-3 px-4 flex items-center {% if request.path == '/' %}active{% endif %}">
+                    <i class="fas fa-home w-6"></i>
+                    <span class="ml-2">Dashboard</span>
+                </a>
+                
+                <!-- Same structure and permissions as desktop sidebar -->
+                {% if user.user_permissions.can_manage_users or user.is_staff %}
+                <div class="px-4 py-2 text-gray-500 text-xs font-bold uppercase mt-4">Staff Management</div>
+                <a href="{% url 'staff_list' %}" class="sidebar-link py-2 px-4 flex items-center {% if 'staff/list' in request.path %}active{% endif %}">
+                    <i class="fas fa-users w-6"></i>
+                    <span class="ml-2">Staff Directory</span>
+                </a>
+                <a href="{% url 'staff_onboarding' %}" class="sidebar-link py-2 px-4 flex items-center {% if 'staff/onboarding' in request.path %}active{% endif %}">
+                    <i class="fas fa-user-plus w-6"></i>
+                    <span class="ml-2">Onboarding</span>
+                </a>
+                <a href="{% url 'staff_bulk_upload' %}" class="sidebar-link py-2 px-4 flex items-center {% if 'staff/bulk-upload' in request.path %}active{% endif %}">
+                    <i class="fas fa-upload w-6"></i>
+                    <span class="ml-2">Bulk Upload</span>
+                </a>
+                {% endif %}
+                
+                <!-- HR Modules - same as desktop -->
+                <!-- Task Management - same as desktop -->
+                <!-- Document Management - same as desktop -->
+            </div>
+            
+            <!-- User Profile Link -->
+            <div class="mt-auto border-t border-gray-700 p-4">
+                <a href="{% url 'profile' %}" class="flex items-center text-gray-300 hover:text-white">
+                    <div class="flex-shrink-0">
+                        {% if user.employee_profile.profile_picture %}
+                        <img src="{{ user.employee_profile.profile_picture.url }}" alt="{{ user.get_full_name }}" class="h-8 w-8 rounded-full">
+                        {% else %}
+                        <i class="fas fa-user-circle text-2xl"></i>
+                        {% endif %}
+                    </div>
+                    <div class="ml-2">
+                        <div class="text-sm font-medium">{{ user.get_full_name }}</div>
+                        <div class="text-xs text-gray-400">{{ user.username }}</div>
+                    </div>
+                </a>
+                <a href="{% url 'logout' %}" class="flex items-center mt-3 text-red-400 hover:text-red-300 text-sm">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        <!-- Desktop Header -->
+        <header class="main-header hidden lg:flex justify-between items-center py-2 px-6 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-800">{% block header %}Dashboard{% endblock %}</h1>
+                <nav class="text-sm" aria-label="Breadcrumb">
+                    <ol class="list-none p-0 inline-flex">
+                        <li class="flex items-center">
+                            <a href="{% url 'dashboard' %}" class="text-gray-500 hover:text-gray-700">Home</a>
+                            <span class="mx-2 text-gray-500">/</span>
+                        </li>
+                        {% block breadcrumbs %}
+                        <li class="text-gray-700">Dashboard</li>
+                        {% endblock %}
+                    </ol>
+                </nav>
+            </div>
+            
+            <div class="flex items-center">
+                <!-- Notifications -->
+                <div class="relative mr-4">
+                    <button class="relative">
+                        <i class="fas fa-bell text-gray-600 text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">
+                            3
+                        </span>
+                    </button>
+                </div>
+                
+                <!-- User Dropdown -->
+                <div class="relative" id="user-dropdown">
+                    <button class="flex items-center focus:outline-none">
+                        <div class="flex items-center">
+                            {% if user.employee_profile.profile_picture %}
+                            <img src="{{ user.employee_profile.profile_picture.url }}" alt="{{ user.get_full_name }}" class="h-8 w-8 rounded-full mr-2">
+                            {% else %}
+                            <i class="fas fa-user-circle text-2xl text-gray-700 mr-2"></i>
+                            {% endif %}
+                            <span class="mr-1 text-sm">{{ user.get_full_name }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </button>
+                    <div class="dropdown-menu bg-white shadow-lg rounded-md py-2 w-48">
+                        <a href="{% url 'profile' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-user mr-2"></i> Profile
+                        </a>
+                        <a href="{% url 'change_password' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-key mr-2"></i> Change Password
+                        </a>
+                        <div class="border-t border-gray-200 my-1"></div>
+                        <a href="{% url 'logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Messages -->
+        <div class="p-4">
+            {% if messages %}
+            <div class="messages mb-4">
+                {% for message in messages %}
+                <div class="px-4 py-3 rounded-md shadow-sm mb-2 {% if message.tags == 'error' %}bg-red-100 text-red-800{% elif message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    <div class="flex items-center">
+                        <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'success' %}fa-check-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Content Area -->
+        <main class="flex-1 p-4">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-white p-4 text-center text-sm text-gray-600 border-t border-gray-200">
+            &copy; {% now "Y" %} National Directorate of Employment. All rights reserved.
+        </footer>
+    </div>
+    {% else %}
+    <!-- Login/Unauthenticated View -->
+    <div class="flex flex-col min-h-screen">
+        {% block auth_content %}{% endblock %}
+    </div>
+    {% endif %}
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Mobile menu toggle
+            $('#mobile-menu-button').click(function() {
+                $('#mobile-sidebar').toggleClass('-translate-x-full');
+                $('#sidebar-overlay').toggleClass('hidden');
+            });
+            
+            $('#sidebar-overlay').click(function() {
+                $('#mobile-sidebar').addClass('-translate-x-full');
+                $('#sidebar-overlay').addClass('hidden');
+            });
+            
+            // Dropdown toggle
+            $('#user-dropdown, #mobile-user-dropdown').click(function(e) {
+                e.stopPropagation();
+                $(this).find('.dropdown-menu').toggleClass('show');
+            });
+            
+            // Close dropdowns when clicking elsewhere
+            $(document).click(function() {
+                $('.dropdown-menu').removeClass('show');
+            });
+            
+            // Auto-hide messages after 5 seconds
+            setTimeout(function() {
+                $('.messages .message').fadeOut(500);
+            }, 5000);
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

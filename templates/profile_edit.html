@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit Profile - NDE HR Management System{% endblock %}
+
+{% block header %}Edit Profile{% endblock %}
+
+{% block breadcrumbs %}
+<li>
+    <a href="{% url 'profile' %}" class="text-gray-500 hover:text-gray-700">My Profile</a>
+    <span class="mx-2 text-gray-500">/</span>
+</li>
+<li class="text-gray-700">Edit Profile</li>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="border-b border-gray-200 p-6">
+        <h2 class="text-xl font-bold text-gray-800">Edit Your Profile</h2>
+        <p class="text-gray-600 mt-1">Update your personal information and preferences.</p>
+        <p class="text-xs text-gray-500 mt-2">
+            <i class="fas fa-info-circle mr-1"></i> Some fields can only be modified by HR. Please contact HR for assistance with those fields.
+        </p>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" class="p-6">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        {{ form.first_name|as_crispy_field }}
+                    </div>
+                    <div>
+                        {{ form.last_name|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    {{ form.email|as_crispy_field }}
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        {{ form.phone_number|as_crispy_field }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Employee Type</label>
+                        <input type="text" value="{{ employee_profile.get_current_employee_type_display }}" class="bg-gray-100 w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700" readonly>
+                        <p class="text-xs text-gray-500 mt-1">Can only be changed by HR</p>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    {{ form.contact_address|as_crispy_field }}
+                </div>
+                
+                <h3 class="text-lg font-medium text-gray-900 mb-4 mt-8">Profile Picture</h3>
+                
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="flex-shrink-0">
+                        {% if employee_profile.profile_picture %}
+                        <img src="{{ employee_profile.profile_picture.url }}" alt="{{ user.get_full_name }}" class="h-24 w-24 rounded-full object-cover">
+                        {% else %}
+                        <div class="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-user-circle text-4xl text-gray-400"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow">
+                        {{ form.profile_picture|as_crispy_field }}
+                        <p class="text-xs text-gray-500 mt-1">Maximum file size: 20KB. Image will be resized if larger.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Employment Details</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" value="{{ employee_profile.current_department.name }}" class="bg-gray-100 w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700" readonly>
+                        <p class="text-xs text-gray-500 mt-1">Department assignment managed by HR</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                        <input type="text" value="{{ employee_profile.current_unit.name|default:'Not Assigned' }}" class="bg-gray-100 w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700" readonly>
+                        <p class="text-xs text-gray-500 mt-1">Unit assignment managed by HR</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Grade Level</label>
+                        <input type="text" value="GL {{ employee_profile.current_grade_level|default:'N/A' }} Step {{ employee_profile.current_step|default:'N/A' }}" class="bg-gray-100 w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700" readonly>
+                        <p class="text-xs text-gray-500 mt-1">Grade level set by HR</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" value="{{ employee_profile.current_designation.name|default:'Not Assigned' }}" class="bg-gray-100 w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700" readonly>
+                        <p class="text-xs text-gray-500 mt-1">Designation set by HR</p>
+                    </div>
+                </div>
+                
+                <h3 class="text-lg font-medium text-gray-900 mb-4 mt-8">Banking Information</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        {{ form.bank|as_crispy_field }}
+                    </div>
+                    <div>
+                        {{ form.account_number|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        {{ form.account_type|as_crispy_field }}
+                    </div>
+                    <div>
+                        {{ form.pfa|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    {{ form.pfa_number|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6 border-t border-gray-200 pt-6">
+            <div class="flex justify-between">
+                <a href="{% url 'profile' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Profile
+                </a>
+                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Handle bank selection
+        $('#id_bank').change(function() {
+            if ($(this).val()) {
+                $('#id_account_number').prop('disabled', false);
+                $('#id_account_type').prop('disabled', false);
+            } else {
+                $('#id_account_number').prop('disabled', true);
+                $('#id_account_type').prop('disabled', true);
+            }
+        });
+        
+        // Handle PFA selection
+        $('#id_pfa').change(function() {
+            if ($(this).val()) {
+                $('#id_pfa_number').prop('disabled', false);
+            } else {
+                $('#id_pfa_number').prop('disabled', true);
+            }
+        });
+        
+        // Initialize disabled state
+        if (!$('#id_bank').val()) {
+            $('#id_account_number').prop('disabled', true);
+            $('#id_account_type').prop('disabled', true);
+        }
+        
+        if (!$('#id_pfa').val()) {
+            $('#id_pfa_number').prop('disabled', true);
+        }
+    });
+</script>
+{% endblock %}

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from .models import EmployeeProfile, Department, Unit, State, LGA
+from .models import *
 
 
 class PasswordResetRequestForm(forms.Form):
@@ -34,7 +34,7 @@ class SetPasswordForm(forms.Form):
 
 
 class ProfileCompleteForm(forms.ModelForm):
-    """Form for completing employee profile"""
+    """Enhanced form for completing employee profile"""
     # User fields
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)
@@ -57,7 +57,7 @@ class ProfileCompleteForm(forms.ModelForm):
         required=True
     )
     phone_number = forms.CharField(max_length=11, required=True)
-    contact_address = forms.CharField(max_length=100, required=True)
+    contact_address = forms.CharField(max_length=100, required=True, widget=forms.Textarea(attrs={'rows': 3}))
     
     # State and LGA fields
     state_of_residence = forms.ModelChoiceField(
@@ -89,6 +89,70 @@ class ProfileCompleteForm(forms.ModelForm):
     # Profile picture
     profile_picture = forms.ImageField(required=False)
     
+    # Employment details
+    CADRE_CHOICES = [
+        ('O', 'Officer'),
+        ('E','Executive'),
+        ('S', 'Secretariat'),
+        ('C', 'Clerical'),
+        ('D', 'Driver')
+    ]
+    current_cadre = forms.ChoiceField(choices=CADRE_CHOICES, required=False)
+    current_grade_level = forms.IntegerField(required=False, min_value=1, max_value=18)
+    current_step = forms.IntegerField(required=False, min_value=1, max_value=15)
+    
+    # Employee Details - Education
+    highest_formal_eduation = forms.ChoiceField(
+        choices=EmployeeDetail.QUALIFICATION_TYPE_CHOICES,
+        required=False,
+        label="Highest Formal Education"
+    )
+    course_of_study = forms.CharField(max_length=50, required=False)
+    area_of_study = forms.CharField(max_length=50, required=False, help_text="Commerce, Arts, Science, etc.")
+    year_of_graduation = forms.IntegerField(required=False)
+    
+    # Employee Details - Bank Information
+    bank = forms.ModelChoiceField(
+        queryset=Bank.objects.all(),
+        required=False,
+        label="Bank"
+    )
+    account_number = forms.CharField(max_length=10, required=False)
+    account_type = forms.ChoiceField(
+        choices=EmployeeDetail.ACCOUNT_TYPE_CHOICES,
+        required=False
+    )
+    pfa = forms.ModelChoiceField(
+        queryset=PFA.objects.all(),
+        required=False,
+        label="Pension Fund Administrator"
+    )
+    pfa_number = forms.CharField(max_length=10, required=False, label="PFA Number")
+    
+    # Next of Kin Information
+    nok1_name = forms.CharField(max_length=50, required=False, label="Next of Kin 1 Name")
+    nok1_phone_number = forms.CharField(max_length=20, required=False, label="Next of Kin 1 Phone Number")
+    nok1_email = forms.EmailField(required=False, label="Next of Kin 1 Email")
+    nok1_relationship = forms.ChoiceField(
+        choices=EmployeeDetail.NOK_RELARIOINSHIP_CHOICES,
+        required=False,
+        label="Next of Kin 1 Relationship"
+    )
+    nok1_address = forms.CharField(max_length=100, required=False, widget=forms.Textarea(attrs={'rows': 2}), label="Next of Kin 1 Address")
+    
+    nok2_name = forms.CharField(max_length=50, required=False, label="Next of Kin 2 Name")
+    nok2_phone_number = forms.CharField(max_length=20, required=False, label="Next of Kin 2 Phone Number")
+    nok2_email = forms.EmailField(required=False, label="Next of Kin 2 Email")
+    nok2_relationship = forms.ChoiceField(
+        choices=EmployeeDetail.NOK_RELARIOINSHIP_CHOICES,
+        required=False,
+        label="Next of Kin 2 Relationship"
+    )
+    nok2_address = forms.CharField(max_length=100, required=False, widget=forms.Textarea(attrs={'rows': 2}), label="Next of Kin 2 Address")
+    
+    # Multiple qualifications
+    additional_qualifications = forms.BooleanField(required=False, initial=False, label="Add more qualifications")
+    
     class Meta:
         model = EmployeeProfile
         fields = [
@@ -96,11 +160,14 @@ class ProfileCompleteForm(forms.ModelForm):
             'phone_number', 'contact_address', 
             'state_of_residence', 'lga_of_residence',
             'state_of_origin', 'lga_of_origin',
-            'nin', 'brn', 'profile_picture'
+            'nin', 'brn', 'profile_picture',
+            'current_cadre', 'current_grade_level', 'current_step',
         ]
     
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        # Get instance if provided
+        instance = kwargs.get('instance', None)
         super(ProfileCompleteForm, self).__init__(*args, **kwargs)
         
         # Initialize user fields if user is provided
@@ -109,14 +176,35 @@ class ProfileCompleteForm(forms.ModelForm):
             self.fields['last_name'].initial = self.user.last_name
             self.fields['email'].initial = self.user.email
             
-            # Get employee profile
-            if hasattr(self.user, 'employee_profile'):
-                profile = self.user.employee_profile
-                for field in self.Meta.fields:
-                    if hasattr(profile, field):
-                        self.fields[field].initial = getattr(profile, field)
+        # Set initial values for state and LGA fields if instance exists
+        if instance:
+            if instance.state_of_residence:
+                # Set LGA queryset for residence
+                self.fields['lga_of_residence'].queryset = LGA.objects.filter(
+                    state=instance.state_of_residence
+                ).order_by('name')
+            
+            if instance.state_of_origin:
+                # Set LGA queryset for origin
+                self.fields['lga_of_origin'].queryset = LGA.objects.filter(
+                    state=instance.state_of_origin
+                ).order_by('name')
+            
+            # Try to get employee detail if it exists
+            try:
+                employee_detail = instance.details
+                # Set initial values for employee detail fields
+                for field_name in ['highest_formal_eduation', 'course_of_study', 'area_of_study', 
+                                  'year_of_graduation', 'bank', 'account_number', 'account_type', 
+                                  'pfa', 'pfa_number', 'nok1_name', 'nok1_phone_number', 'nok1_email',
+                                  'nok1_relationship', 'nok1_address', 'nok2_name', 'nok2_phone_number',
+                                  'nok2_email', 'nok2_relationship', 'nok2_address']:
+                    if hasattr(employee_detail, field_name) and field_name in self.fields:
+                        self.fields[field_name].initial = getattr(employee_detail, field_name)
+            except EmployeeDetail.DoesNotExist:
+                pass
         
-        # Set up dynamic LGA choices based on state
+        # Handle dynamic LGA selection from form data
         if 'state_of_residence' in self.data:
             try:
                 state_id = int(self.data.get('state_of_residence'))
@@ -159,10 +247,22 @@ class ProfileCompleteForm(forms.ModelForm):
                 raise ValidationError("NIN must be 11 digits.")
             
             # Check if NIN is already used by another employee
-            if EmployeeProfile.objects.filter(nin=nin).exclude(user=self.user).exists():
+            existing_profiles = EmployeeProfile.objects.filter(nin=nin)
+            if self.instance and self.instance.pk:
+                existing_profiles = existing_profiles.exclude(pk=self.instance.pk)
+                
+            if existing_profiles.exists():
                 raise ValidationError("This NIN is already registered in the system.")
         
         return nin
+    
+    def clean_account_number(self):
+        """Validate account number format if provided"""
+        account_number = self.cleaned_data.get('account_number')
+        if account_number:
+            if not account_number.isdigit() or len(account_number) != 10:
+                raise ValidationError("Account number must be 10 digits.")
+        return account_number
     
     def clean_profile_picture(self):
         """Process and validate profile picture"""
@@ -191,7 +291,7 @@ class ProfileCompleteForm(forms.ModelForm):
         return image
     
     def save(self, commit=True):
-        """Save both user and employee profile data"""
+        """Save both user and employee profile data, including employee details"""
         # Update user data
         if self.user:
             self.user.first_name = self.cleaned_data.get('first_name')
@@ -200,16 +300,75 @@ class ProfileCompleteForm(forms.ModelForm):
             if commit:
                 self.user.save()
         
-        # Update or create profile
+        # Update profile
         profile = super().save(commit=False)
-        profile.user = self.user
+        
+        # Ensure profile is linked to the user
+        if self.user and not profile.user_id:
+            profile.user = self.user
+        
+        # Mark profile as completed
+        profile.is_profile_completed = True
         
         if commit:
-            profile.is_profile_completed = True
             profile.save()
+            
+            # Create or update EmployeeDetail
+            employee_detail, created = EmployeeDetail.objects.get_or_create(
+                employee_profile=profile
+            )
+            
+            # Update employee detail fields
+            detail_fields = [
+                'highest_formal_eduation', 'course_of_study', 'area_of_study', 
+                'year_of_graduation', 'bank', 'account_number', 'account_type', 
+                'pfa', 'pfa_number', 'nok1_name', 'nok1_phone_number', 'nok1_email',
+                'nok1_relationship', 'nok1_address', 'nok2_name', 'nok2_phone_number',
+                'nok2_email', 'nok2_relationship', 'nok2_address'
+            ]
+            
+            for field in detail_fields:
+                if field in self.cleaned_data:
+                    setattr(employee_detail, field, self.cleaned_data.get(field))
+            
+            employee_detail.save()
+            
+            # Create educational qualification if data provided
+            if (self.cleaned_data.get('highest_formal_eduation') and 
+                self.cleaned_data.get('course_of_study') and
+                self.cleaned_data.get('year_of_graduation')):
+                
+                # Check if this qualification already exists
+                existing_qual = EducationalQualification.objects.filter(
+                    employee_profile=profile,
+                    qualification_type=self.cleaned_data.get('highest_formal_eduation'),
+                    course_of_study=self.cleaned_data.get('course_of_study'),
+                    year_of_graduation=self.cleaned_data.get('year_of_graduation')
+                ).first()
+                
+                if not existing_qual:
+                    EducationalQualification.objects.create(
+                        employee_profile=profile,
+                        qualification_type=self.cleaned_data.get('highest_formal_eduation'),
+                        course_of_study=self.cleaned_data.get('course_of_study'),
+                        area_of_study=self.cleaned_data.get('area_of_study', ''),
+                        institution=self.cleaned_data.get('institution', ''),
+                        year_of_graduation=self.cleaned_data.get('year_of_graduation'),
+                        created_by=self.user
+                    )
         
         return profile
 
+
+class AdditionalQualificationForm(forms.ModelForm):
+    """Form for adding additional qualifications"""
+    class Meta:
+        model = EducationalQualification
+        fields = ['qualification_type', 'course_of_study', 'area_of_study', 'institution', 'year_of_graduation']
+        widgets = {
+            'year_of_graduation': forms.NumberInput(attrs={'min': 1960, 'max': lambda: get_current_year()})
+        }
+        
 
 class StaffOnboardingForm(forms.Form):
     """Form for HR staff to onboard a new employee"""

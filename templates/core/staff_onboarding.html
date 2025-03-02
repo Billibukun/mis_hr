@@ -36,7 +36,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="form-group">
-                        {{ form.username|as_crispy_field }}
+                        {{ form.username | as_crispy_field }}
                     </div>
 
                     <div class="form-group">
@@ -61,15 +61,15 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="form-group">
-                        {% crispy_field form.file_number label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                       {{ form.file_number | as_crispy_field }}
                     </div>
 
                     <div class="form-group">
-                        {% crispy_field form.ippis_number label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.ippis_number | as_crispy_field }}
                     </div>
 
                     <div class="form-group">
-                        {% crispy_field form.current_employee_type label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.current_employee_type | as_crispy_field }}
                     </div>
                 </div>
             </div>
@@ -80,26 +80,26 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
-                        {% crispy_field form.current_department label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.current_department | as_crispy_field }}
                     </div>
 
                     <div class="form-group">
-                        {% crispy_field form.current_unit label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.current_unit | as_crispy_field }}
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="form-group">
-                        {% crispy_field form.current_designation label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.current_designation | as_crispy_field }}
                     </div>
 
                     <div class="form-group">
-                        {% crispy_field form.current_grade_level label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.current_grade_level | as_crispy_field }}
                         <p class="text-xs text-gray-500 mt-1">1-17, excluding 11</p>
                     </div>
 
                     <div class="form-group">
-                        {% crispy_field form.current_step label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.current_step | as_crispy_field }}
                         <p class="text-xs text-gray-500 mt-1">1-15</p>
                     </div>
                 </div>
@@ -111,12 +111,12 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
-                        {% crispy_field form.date_of_appointment label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.date_of_appointment | as_crispy_field }}
                         <p class="text-xs text-gray-500 mt-1">Date on appointment letter</p>
                     </div>
 
                     <div class="form-group">
-                        {% crispy_field form.date_of_assumption label_class="form-label" wrapper_class="form-group" error_text_inline=False help_text_inline=False %}
+                        {{ form.date_of_assumption | as_crispy_field }}
                         <p class="text-xs text-gray-500 mt-1">Date employee assumed duty</p>
                     </div>
                 </div>

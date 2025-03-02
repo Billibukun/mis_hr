@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Resolve Verification Issues - NDE HR Management System{% endblock %}
+
+{% block header %}Resolve Verification Issues{% endblock %}
+
+{% block breadcrumbs %}
+<li>
+    <a href="{% url 'staff_list' %}" class="text-gray-500 hover:text-gray-700">Staff Directory</a>
+    <span class="mx-2 text-gray-500">/</span>
+</li>
+<li class="text-gray-700">Resolve Verification Issues</li>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="border-b border-gray-200 p-6">
+        <h2 class="text-xl font-bold text-gray-800">Resolve Verification Issues</h2>
+        <p class="text-gray-600 mt-1">Review and resolve issues flagged during the verification process.</p>
+    </div>
+    
+    <div class="bg-yellow-50 p-6 border-b border-gray-200">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-lg font-medium text-yellow-800">Issues Detected</h3>
+                <div class="mt-2 text-sm text-yellow-700">
+                    <p class="font-medium">Employee: {{ verification.employee_profile.user.get_full_name }}</p>
+                    <p class="mt-1">File Number: {{ verification.employee_profile.file_number }}</p>
+                    <p class="mt-1">Department: {{ verification.employee_profile.current_department.name|default:"Not Assigned" }}</p>
+                    
+                    <div class="mt-4 bg-white p-4 rounded-md border border-yellow-200">
+                        <p class="font-medium">Issue Description:</p>
+                        <p class="mt-1">{{ verification.issue_description }}</p>
+                    </div>
+                    
+                    <p class="mt-4">
+                        <span class="font-medium">Flagged by:</span> 
+                        {{ verification.flagged_by.get_full_name }} on {{ verification.flagged_date|date:"F j, Y" }}
+                    </p>
+                    
+                    {% if verification.has_age_flag or verification.has_education_flag or verification.has_employment_flag %}
+                    <div class="mt-4">
+                        <p class="font-medium">System Flags:</p>
+                        <ul class="list-disc pl-5 mt-1">
+                            {% if verification.has_age_flag %}
+                            <li>Age discrepancy detected</li>
+                            {% endif %}
+                            
+                            {% if verification.has_education_flag %}
+                            <li>Education timeline issue detected</li>
+                            {% endif %}
+                            
+                            {% if verification.has_employment_flag %}
+                            <li>Employment date issue detected</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="p-6">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="space-y-6">
+                <div>
+                    <label for="resolution_notes" class="block text-sm font-medium text-gray-700 mb-1">Resolution Notes</label>
+                    <textarea id="resolution_notes" name="resolution_notes" rows="5" class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm" placeholder="Describe how the issues were resolved..."></textarea>
+                    <p class="mt-1 text-sm text-gray-500">Please provide detailed information about how the issues were resolved.</p>
+                </div>
+                
+                <div class="flex items-center">
+                    <input id="verify_after_resolution" name="verify_after_resolution" type="checkbox" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                    <label for="verify_after_resolution" class="ml-2 block text-sm text-gray-700">Verify profile after resolution</label>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Resolution Guidelines:</h4>
+                    <ul class="list-disc pl-5 text-sm text-gray-500 space-y-1">
+                        <li>Check with employee to confirm correct information</li>
+                        <li>Update employee profile with accurate information</li>
+                        <li>Verify supporting documents where necessary</li>
+                        <li>Ensure all system flags are addressed</li>
+                        <li>Check for consistency across all profile sections</li>
+                    </ul>
+                </div>
+                
+                <div class="flex justify-between pt-4">
+                    <a href="{% url 'staff_list' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to Staff List
+                    </a>
+                    <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
+                        <i class="fas fa-check-circle mr-1"></i> Resolve Issues
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Verification History -->
+<div class="bg-white shadow-md rounded-lg overflow-hidden mt-6">
+    <div class="border-b border-gray-200 p-6">
+        <h3 class="text-xl font-bold text-gray-800">Verification History</h3>
+    </div>
+    
+    <div class="p-6">
+        <div class="flow-root">
+            <ul class="-mb-8">
+                {% for log in verification.logs.all %}
+                <li>
+                    <div class="relative pb-8">
+                        {% if not forloop.last %}
+                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                        {% endif %}
+                        <div class="relative flex space-x-3">
+                            <div>
+                                <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white 
+                                    {% if log.action == 'CREATED' %}bg-blue-500
+                                    {% elif log.action == 'VERIFIED' %}bg-green-500
+                                    {% elif log.action == 'FLAGGED' %}bg-red-500
+                                    {% elif log.action == 'RESOLVED' %}bg-yellow-500
+                                    {% elif log.action == 'REJECTED' %}bg-gray-500
+                                    {% elif log.action == 'UPDATED' %}bg-purple-500
+                                    {% elif log.action == 'AUTO_CHECK' %}bg-indigo-500
+                                    {% else %}bg-gray-500{% endif %}">
+                                    <i class="fas 
+                                        {% if log.action == 'CREATED' %}fa-plus
+                                        {% elif log.action == 'VERIFIED' %}fa-check
+                                        {% elif log.action == 'FLAGGED' %}fa-exclamation
+                                        {% elif log.action == 'RESOLVED' %}fa-tools
+                                        {% elif log.action == 'REJECTED' %}fa-times
+                                        {% elif log.action == 'UPDATED' %}fa-edit
+                                        {% elif log.action == 'AUTO_CHECK' %}fa-robot
+                                        {% else %}fa-history{% endif %} text-white"></i>
+                                </span>
+                            </div>
+                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                <div>
+                                    <p class="text-sm text-gray-500">
+                                        {% if log.action == 'CREATED' %}
+                                            Verification record created
+                                        {% elif log.action == 'VERIFIED' %}
+                                            Profile verified
+                                        {% elif log.action == 'FLAGGED' %}
+                                            Issues flagged
+                                        {% elif log.action == 'RESOLVED' %}
+                                            Issues resolved
+                                        {% elif log.action == 'REJECTED' %}
+                                            Verification rejected
+                                        {% elif log.action == 'UPDATED' %}
+                                            Profile updated
+                                        {% elif log.action == 'AUTO_CHECK' %}
+                                            Automated checks performed
+                                        {% else %}
+                                            {{ log.get_action_display }}
+                                        {% endif %}
+                                        
+                                        {% if log.performed_by %}
+                                            by <span class="font-medium text-gray-900">{{ log.performed_by.get_full_name }}</span>
+                                        {% else %}
+                                            by <span class="font-medium text-gray-900">System</span>
+                                        {% endif %}
+                                    </p>
+                                    
+                                    {% if log.details %}
+                                    <p class="mt-1 text-sm text-gray-500">
+                                        {{ log.details }}
+                                    </p>
+                                    {% endif %}
+                                </div>
+                                <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                    <time datetime="{{ log.timestamp|date:'c' }}">{{ log.timestamp|date:"M d, Y H:i" }}</time>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="text-center py-6 text-gray-500">
+                    <i class="fas fa-history text-2xl mb-2"></i>
+                    <p>No verification history available.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
